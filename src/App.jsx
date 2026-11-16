@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-  Calendar as CalendarIcon,
   Clock,
   Instagram,
   Lock,
@@ -11,15 +10,13 @@ import {
   Check,
   Image as ImageIcon,
   ShieldCheck,
-  Sparkles,
   X,
   Download,
-  Info,
   Plus,
   Trash2,
-  CheckCircle2,
-  Sliders,
   Eye,
+  CalendarCheck,
+  CalendarX,
 } from 'lucide-react';
 import tinaLogo from '../tina studio (1).png';
 
@@ -100,7 +97,7 @@ const LashStyleDiagram = ({ variant = 'classic' }) => {
   );
 };
 
-// --- CATÁLOGO INICIAL ACTUALIZADO (PRECIOS CORREGIDOS Y SIN HENNA BROW TINT) ---
+// --- CATÁLOGO BASE ---
 const INITIAL_SERVICES = [
   // LASHES
   {
@@ -272,7 +269,7 @@ const INITIAL_SERVICES = [
     image: '',
   },
 
-  // EYEBROW (Brow tint henna eliminado)
+  // EYEBROW
   {
     id: 'brow-lamination',
     category: 'eyebrow',
@@ -425,16 +422,57 @@ const INITIAL_SERVICES = [
   },
 ];
 
-const TIME_SLOTS = ['9:00 AM', '12:30 PM', '4:00 PM'];
+const BASE_TIME_SLOTS = ['9:00 AM', '12:30 PM', '4:00 PM'];
 
 const DEFAULT_GLOBAL_POLICY = {
   EN: 'A 50% non-refundable deposit is required via Instagram DM (@tinastudioo) to secure your appointment.',
   ES: 'Se requiere un depósito del 50% no reembolsable vía Instagram DM (@tinastudioo) para asegurar tu cita.',
 };
 
-// --- UTILIDAD CALENDARIO MENSUAL ---
+// --- UTILIDADES DE FECHA Y HORA ---
 function formatDateISO(year, month, day) {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+}
+
+function parseSlotTo24Hour(slotStr) {
+  const match = slotStr.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (!match) return { hour: 9, minute: 0 };
+  let hour = parseInt(match[1], 10);
+  const minute = parseInt(match[2], 10);
+  const period = match[3].toUpperCase();
+  if (period === 'PM' && hour !== 12) hour += 12;
+  if (period === 'AM' && hour === 12) hour = 0;
+  return { hour, minute };
+}
+
+function format24To12Hour(time24) {
+  if (!time24 || !time24.includes(':')) return '';
+  const [hStr, mStr] = time24.split(':');
+  let h = parseInt(hStr, 10);
+  const period = h >= 12 ? 'PM' : 'AM';
+  if (h === 0) h = 12;
+  else if (h > 12) h -= 12;
+  return `${h}:${mStr} ${period}`;
+}
+
+function compressImageFile(file, callback) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const maxWidth = 640;
+      const scale = Math.min(1, maxWidth / img.width);
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      callback(canvas.toDataURL('image/jpeg', 0.8));
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
 }
 
 export default function App() {
@@ -444,7 +482,7 @@ export default function App() {
 
   // Carrito y flujo de reserva
   const [cartIds, setCartIds] = useState(['lash-hybrid']);
-  const [bookingStep, setBookingStep] = useState(1); // 1: Fecha/Hora, 2: Datos, 3: Confirmación & DM
+  const [bookingStep, setBookingStep] = useState(1);
   const [viewMonth, setViewMonth] = useState(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
@@ -457,80 +495,99 @@ export default function App() {
   const [policyAccepted, setPolicyAccepted] = useState(false);
   const [copiedAlert, setCopiedAlert] = useState(false);
 
-  // Estados persistentes (Editables desde Perfil Privado)
+  // Estados persistentes editables desde Perfil Privado
   const [services, setServices] = useState(() => {
     try {
-      const saved = localStorage.getItem('tina_studio_services_v3');
+      const saved = localStorage.getItem('tina_studio_services_v4');
       return saved ? JSON.parse(saved) : INITIAL_SERVICES;
     } catch {
       return INITIAL_SERVICES;
     }
   });
   const [nailsEnabled, setNailsEnabled] = useState(() => {
-    return localStorage.getItem('tina_studio_nails_v3') === 'true';
+    return localStorage.getItem('tina_studio_nails_v4') === 'true';
   });
   const [globalPolicy, setGlobalPolicy] = useState(() => {
     try {
-      const saved = localStorage.getItem('tina_studio_policy_v3');
+      const saved = localStorage.getItem('tina_studio_policy_v4');
       return saved ? JSON.parse(saved) : DEFAULT_GLOBAL_POLICY;
     } catch {
       return DEFAULT_GLOBAL_POLICY;
     }
   });
-  const [blockedSlots, setBlockedSlots] = useState(() => {
+  // Control avanzado de días y cupos:
+  // scheduleOverrides[iso] = { status: 'open' | 'closed', extraSlots: string[], blockedSlots: string[] }
+  const [scheduleOverrides, setScheduleOverrides] = useState(() => {
     try {
-      const saved = localStorage.getItem('tina_studio_blocked_v3');
-      return saved ? JSON.parse(saved) : [];
+      const saved = localStorage.getItem('tina_studio_schedule_v4');
+      return saved ? JSON.parse(saved) : {};
     } catch {
-      return [];
+      return {};
     }
   });
   const [bookings, setBookings] = useState(() => {
     try {
-      const saved = localStorage.getItem('tina_studio_bookings_v3');
+      const saved = localStorage.getItem('tina_studio_bookings_v4');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
     }
   });
   const [adminPin, setAdminPin] = useState(() => {
-    return localStorage.getItem('tina_studio_pin_v3') || '2026';
+    return localStorage.getItem('tina_studio_pin_v4') || '2026';
   });
   const [scriptUrl, setScriptUrl] = useState(() => {
-    return localStorage.getItem('tina_studio_script_v3') || '';
+    return localStorage.getItem('tina_studio_script_v4') || '';
   });
   const [googleBusySlots, setGoogleBusySlots] = useState([]);
 
-  // Estados de Perfil Privado & Modal PIN
+  // Estados del Perfil Privado
   const [isAdmin, setIsAdmin] = useState(false);
   const [showPinModal, setShowPinModal] = useState(false);
   const [pinEntry, setPinEntry] = useState('');
   const [pinError, setPinError] = useState(false);
-  const [adminTab, setAdminTab] = useState('catalog'); // 'catalog' | 'policies' | 'agenda' | 'security'
+  const [adminTab, setAdminTab] = useState('catalog'); // 'catalog' | 'agenda' | 'policies' | 'security'
   const [newPinInput, setNewPinInput] = useState('');
   const [savedBanner, setSavedBanner] = useState(false);
-  const [newServiceName, setNewServiceName] = useState('');
-  const [newServiceCat, setNewServiceCat] = useState('lashes');
-  const [newServicePrice, setNewServicePrice] = useState('');
 
-  // Auto-guardado local
+  // Formulario para agregar nuevo servicio
+  const [newSrvCat, setNewSrvCat] = useState('lashes');
+  const [newSrvName, setNewSrvName] = useState('');
+  const [newSrvPrice, setNewSrvPrice] = useState('');
+  const [newSrvDuration, setNewSrvDuration] = useState('2h 30m');
+  const [newSrvDescEN, setNewSrvDescEN] = useState('');
+  const [newSrvDescES, setNewSrvDescES] = useState('');
+  const [newSrvImage, setNewSrvImage] = useState('');
+
+  // Estados del gestor de calendario en el Perfil Privado
+  const [adminViewMonth, setAdminViewMonth] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
+  const [adminSelectedDate, setAdminSelectedDate] = useState(() => {
+    const now = new Date();
+    return formatDateISO(now.getFullYear(), now.getMonth(), now.getDate());
+  });
+  const [customTime24, setCustomTime24] = useState('18:30');
+
+  // Persistencia automática
   useEffect(() => {
-    localStorage.setItem('tina_studio_services_v3', JSON.stringify(services));
+    localStorage.setItem('tina_studio_services_v4', JSON.stringify(services));
   }, [services]);
   useEffect(() => {
-    localStorage.setItem('tina_studio_nails_v3', String(nailsEnabled));
+    localStorage.setItem('tina_studio_nails_v4', String(nailsEnabled));
   }, [nailsEnabled]);
   useEffect(() => {
-    localStorage.setItem('tina_studio_policy_v3', JSON.stringify(globalPolicy));
+    localStorage.setItem('tina_studio_policy_v4', JSON.stringify(globalPolicy));
   }, [globalPolicy]);
   useEffect(() => {
-    localStorage.setItem('tina_studio_blocked_v3', JSON.stringify(blockedSlots));
-  }, [blockedSlots]);
+    localStorage.setItem('tina_studio_schedule_v4', JSON.stringify(scheduleOverrides));
+  }, [scheduleOverrides]);
   useEffect(() => {
-    localStorage.setItem('tina_studio_bookings_v3', JSON.stringify(bookings));
+    localStorage.setItem('tina_studio_bookings_v4', JSON.stringify(bookings));
   }, [bookings]);
 
-  // Leer disponibilidad desde Google Apps Script si está conectado
+  // Leer disponibilidad desde Google Apps Script
   useEffect(() => {
     if (!scriptUrl) return;
     fetch(scriptUrl)
@@ -548,16 +605,40 @@ export default function App() {
     setTimeout(() => setSavedBanner(false), 2000);
   };
 
+  // --- LÓGICA CENTRAL DE DISPONIBILIDAD DE DÍAS Y CUPOS ---
+  const isDateAvailableForClients = (dateISO, dayOfWeek) => {
+    const override = scheduleOverrides[dateISO];
+    if (override?.status === 'closed') return false;
+    if (override?.status === 'open') return true;
+    return dayOfWeek === 5 || dayOfWeek === 6; // Viernes y Sábados por defecto
+  };
+
+  const getSlotsForDate = (dateISO) => {
+    const override = scheduleOverrides[dateISO];
+    const extra = override?.extraSlots || [];
+    const combined = [...BASE_TIME_SLOTS];
+    extra.forEach((slot) => {
+      if (!combined.includes(slot)) combined.push(slot);
+    });
+    return combined;
+  };
+
+  const isSlotUnavailable = (dateISO, slot) => {
+    const override = scheduleOverrides[dateISO];
+    if (override?.blockedSlots?.includes(slot)) return true;
+    if (googleBusySlots.includes(`${dateISO}|${slot}`)) return true;
+    return bookings.some((b) => b.date === dateISO && b.time === slot);
+  };
+
   // Textos bilingües
   const copy = {
     EN: {
       navServices: 'Services',
       navBook: 'Book Now',
-      navPolicy: '50% Policy',
-      heroTag: 'BY VALENTINA ARRAIZ · FRIDAYS & SATURDAYS',
+      heroTag: 'BY VALENTINA ARRAIZ · STUDIO AGENDA',
       heroTitle: 'Refined Lashes, Sculpted Brows & Beauty Rituals.',
       heroSub:
-        'Explore our visual style guide, choose your beauty session, and lock your Friday or Saturday appointment via Instagram DM.',
+        'Explore our visual style guide, choose your beauty session, and lock your available appointment via Instagram DM.',
       heroCta: 'Explore Menu & Book',
       catAll: 'All Services',
       catLashes: 'Lashes',
@@ -570,12 +651,12 @@ export default function App() {
       addedBtn: 'Selected',
       intensityLabel: 'Volume / Drama',
       bookingTitle: 'Reserve Your Appointment',
-      bookingSubtitle: 'Appointments are exclusively available on Fridays & Saturdays at 9:00 AM, 12:30 PM & 4:00 PM.',
+      bookingSubtitle: 'Select any highlighted available date on the calendar to view open time slots.',
       step1: '1. Select Date & Time',
       step2: '2. Client Details',
       step3: '3. Review & Book via DM',
-      selectFridaySat: 'Select an available Friday or Saturday on the calendar:',
-      availableSlots: 'Available Time Blocks (2h 30m – 3h session)',
+      selectFridaySat: 'Available dates are highlighted in gold:',
+      availableSlots: 'Available Time Slots',
       bookedLabel: 'Booked',
       fullName: 'Full Name *',
       igHandle: 'Instagram Username (e.g. @maria) *',
@@ -600,11 +681,10 @@ export default function App() {
     ES: {
       navServices: 'Servicios',
       navBook: 'Agendar',
-      navPolicy: 'Política 50%',
-      heroTag: 'BY VALENTINA ARRAIZ · VIERNES Y SÁBADOS',
+      heroTag: 'BY VALENTINA ARRAIZ · AGENDA DEL ESTUDIO',
       heroTitle: 'Pestañas de Autor, Cejas Esculpidas y Rituales de Belleza.',
       heroSub:
-        'Explora nuestra guía visual de estilos, elige tus servicios y asegura tu cita de viernes o sábado vía Instagram DM.',
+        'Explora nuestra guía visual de estilos, elige tus servicios y asegura tu cita en los días disponibles vía Instagram DM.',
       heroCta: 'Ver Menú y Reservar',
       catAll: 'Todos',
       catLashes: 'Pestañas',
@@ -617,12 +697,12 @@ export default function App() {
       addedBtn: 'Seleccionado',
       intensityLabel: 'Volumen / Intensidad',
       bookingTitle: 'Agenda tu Cita',
-      bookingSubtitle: 'Atendemos exclusivamente viernes y sábados en bloques de 9:00 AM, 12:30 PM y 4:00 PM.',
+      bookingSubtitle: 'Selecciona cualquier fecha resaltada en el calendario para ver los cupos disponibles.',
       step1: '1. Elige Fecha y Hora',
       step2: '2. Tus Datos',
       step3: '3. Resumen y DM',
-      selectFridaySat: 'Selecciona un viernes o sábado disponible en el calendario:',
-      availableSlots: 'Horarios Disponibles (sesión de 2h 30m – 3h)',
+      selectFridaySat: 'Las fechas disponibles están resaltadas en dorado:',
+      availableSlots: 'Cupos y Horarios Disponibles',
       bookedLabel: 'Ocupado',
       fullName: 'Nombre Completo *',
       igHandle: 'Usuario de Instagram (ej. @maria) *',
@@ -669,54 +749,67 @@ export default function App() {
     setCartIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   };
 
-  // --- GENERACIÓN DE DÍAS DEL CALENDARIO MENSUAL ---
+  // Calendario público
   const calendarDays = useMemo(() => {
     const year = viewMonth.getFullYear();
     const month = viewMonth.getMonth();
-    const firstDayOfWeek = new Date(year, month, 1).getDay(); // 0=Dom ... 6=Sab
+    const firstDayOfWeek = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     const cells = [];
-    for (let i = 0; i < firstDayOfWeek; i++) {
-      cells.push(null);
-    }
+    for (let i = 0; i < firstDayOfWeek; i++) cells.push(null);
     for (let d = 1; d <= daysInMonth; d++) {
       const dateObj = new Date(year, month, d);
-      const dayOfWeek = dateObj.getDay(); // 5 = Viernes, 6 = Sábado
-      const isFriOrSat = dayOfWeek === 5 || dayOfWeek === 6;
+      const dayOfWeek = dateObj.getDay();
       const isPast = dateObj < today;
       const iso = formatDateISO(year, month, d);
+      const open = isDateAvailableForClients(iso, dayOfWeek);
       cells.push({
         day: d,
         iso,
-        enabled: isFriOrSat && !isPast,
-        isFriOrSat,
+        enabled: open && !isPast,
       });
     }
     return cells;
-  }, [viewMonth]);
+  }, [viewMonth, scheduleOverrides]);
 
-  const isSlotUnavailable = (dateISO, slot) => {
-    const key = `${dateISO}|${slot}`;
-    if (blockedSlots.includes(key)) return true;
-    if (googleBusySlots.includes(key)) return true;
-    return bookings.some((b) => b.date === dateISO && b.time === slot);
-  };
+  // Calendario del administrador (Valentina)
+  const adminCalendarDays = useMemo(() => {
+    const year = adminViewMonth.getFullYear();
+    const month = adminViewMonth.getMonth();
+    const firstDayOfWeek = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    const cells = [];
+    for (let i = 0; i < firstDayOfWeek; i++) cells.push(null);
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateObj = new Date(year, month, d);
+      const dayOfWeek = dateObj.getDay();
+      const iso = formatDateISO(year, month, d);
+      const isOpen = isDateAvailableForClients(iso, dayOfWeek);
+      const override = scheduleOverrides[iso];
+      cells.push({
+        day: d,
+        iso,
+        dayOfWeek,
+        isOpen,
+        hasOverride: Boolean(override),
+      });
+    }
+    return cells;
+  }, [adminViewMonth, scheduleOverrides]);
 
   // Descargar recordatorio .ics
   const handleDownloadICS = () => {
     if (!selectedDate || !selectedTime) return;
     const [y, m, d] = selectedDate.split('-').map(Number);
-    const hour = selectedTime === '9:00 AM' ? 9 : selectedTime === '12:30 PM' ? 12 : 16;
-    const min = selectedTime === '12:30 PM' ? 30 : 0;
-    const start = new Date(y, m - 1, d, hour, min);
+    const { hour, minute } = parseSlotTo24Hour(selectedTime);
+    const start = new Date(y, m - 1, d, hour, minute);
     const end = new Date(start.getTime() + 3 * 60 * 60 * 1000);
 
-    const toICSDate = (dt) =>
-      dt.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-
+    const toICSDate = (dt) => dt.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
     const serviceNames = cartItems.map((i) => i.name).join(', ');
     const icsContent = [
       'BEGIN:VCALENDAR',
@@ -740,7 +833,7 @@ export default function App() {
     URL.revokeObjectURL(url);
   };
 
-  // Acción final: Copiar resumen, registrar en agenda/Google y abrir Instagram DM
+  // Acción final: Copiar resumen, guardar y abrir Instagram DM
   const handleBookViaInstagram = async (e) => {
     if (!policyAccepted || !selectedDate || !selectedTime || !clientName.trim()) {
       e.preventDefault();
@@ -781,9 +874,8 @@ export default function App() {
 
     if (scriptUrl) {
       const [y, m, d] = selectedDate.split('-').map(Number);
-      const hour = selectedTime === '9:00 AM' ? 9 : selectedTime === '12:30 PM' ? 12 : 16;
-      const min = selectedTime === '12:30 PM' ? 30 : 0;
-      const startISO = new Date(y, m - 1, d, hour, min).toISOString();
+      const { hour, minute } = parseSlotTo24Hour(selectedTime);
+      const startISO = new Date(y, m - 1, d, hour, minute).toISOString();
 
       fetch(scriptUrl, {
         method: 'POST',
@@ -823,6 +915,41 @@ export default function App() {
     }
   };
 
+  const handleCreateService = (e) => {
+    e.preventDefault();
+    if (!newSrvName.trim() || !newSrvPrice) return;
+    const priceNum = Number(newSrvPrice) || 0;
+    const half = (priceNum / 2).toFixed(priceNum % 2 === 0 ? 0 : 2);
+
+    const created = {
+      id: `srv-${Date.now()}`,
+      category: newSrvCat,
+      name: newSrvName.trim(),
+      price: priceNum,
+      duration: newSrvDuration.trim() || '2h 30m',
+      descEN: newSrvDescEN.trim() || 'Specialized beauty service by Valentina Arraiz.',
+      descES: newSrvDescES.trim() || 'Servicio especializado realizado por Valentina Arraiz.',
+      policyEN: `A 50% non-refundable deposit ($${half}) is required via Instagram DM to lock your date.`,
+      policyES: `Se requiere un depósito del 50% no reembolsable ($${half}) vía Instagram DM para reservar tu cupo.`,
+      image: newSrvImage,
+    };
+
+    setServices((prev) => [created, ...prev]);
+    setNewSrvName('');
+    setNewSrvPrice('');
+    setNewSrvDuration('2h 30m');
+    setNewSrvDescEN('');
+    setNewSrvDescES('');
+    setNewSrvImage('');
+    showSavedFeedback();
+  };
+
+  const handleDeleteService = (id) => {
+    setServices((prev) => prev.filter((s) => s.id !== id));
+    setCartIds((prev) => prev.filter((cid) => cid !== id));
+    showSavedFeedback();
+  };
+
   const handleUpdatePrice = (id, value) => {
     setServices((prev) =>
       prev.map((s) => (s.id === id ? { ...s, price: Number(value) || 0 } : s))
@@ -837,57 +964,81 @@ export default function App() {
     showSavedFeedback();
   };
 
-  const handleUploadServicePhoto = (id, file) => {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const maxWidth = 640;
-        const scale = Math.min(1, maxWidth / img.width);
-        canvas.width = img.width * scale;
-        canvas.height = img.height * scale;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        const compressed = canvas.toDataURL('image/jpeg', 0.8);
-
-        setServices((prev) =>
-          prev.map((s) => (s.id === id ? { ...s, image: compressed } : s))
-        );
-        showSavedFeedback();
+  // Controles de días y cupos en el Perfil Privado
+  const setDayStatus = (dateISO, status) => {
+    setScheduleOverrides((prev) => {
+      const current = prev[dateISO] || { extraSlots: [], blockedSlots: [] };
+      return {
+        ...prev,
+        [dateISO]: {
+          ...current,
+          status,
+        },
       };
-      img.src = ev.target.result;
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleAddNewService = (e) => {
-    e.preventDefault();
-    if (!newServiceName.trim() || !newServicePrice) return;
-    const item = {
-      id: `custom-${Date.now()}`,
-      category: newServiceCat,
-      name: newServiceName.trim(),
-      price: Number(newServicePrice),
-      duration: '2h 30m',
-      descEN: 'Custom beauty treatment by Valentina Arraiz.',
-      descES: 'Servicio personalizado por Valentina Arraiz.',
-      policyEN: globalPolicy.EN,
-      policyES: globalPolicy.ES,
-      image: '',
-    };
-    setServices((prev) => [...prev, item]);
-    setNewServiceName('');
-    setNewServicePrice('');
+    });
     showSavedFeedback();
   };
 
-  const toggleBlockSlot = (dateISO, slot) => {
-    const key = `${dateISO}|${slot}`;
-    setBlockedSlots((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
-    );
+  const toggleSlotBlockOnAdminDate = (dateISO, slot) => {
+    setScheduleOverrides((prev) => {
+      const current = prev[dateISO] || { extraSlots: [], blockedSlots: [] };
+      const blocked = current.blockedSlots || [];
+      const nextBlocked = blocked.includes(slot)
+        ? blocked.filter((s) => s !== slot)
+        : [...blocked, slot];
+      return {
+        ...prev,
+        [dateISO]: {
+          ...current,
+          blockedSlots: nextBlocked,
+        },
+      };
+    });
+    showSavedFeedback();
+  };
+
+  const addCustomSlotToDate = (dateISO, slotLabel) => {
+    if (!slotLabel) return;
+    setScheduleOverrides((prev) => {
+      const current = prev[dateISO] || { extraSlots: [], blockedSlots: [] };
+      const existingExtra = current.extraSlots || [];
+      if (BASE_TIME_SLOTS.includes(slotLabel) || existingExtra.includes(slotLabel)) {
+        return prev;
+      }
+      // Al agregar un cupo en un día cerrado, lo abrimos automáticamente
+      const [y, m, d] = dateISO.split('-').map(Number);
+      const dow = new Date(y, m - 1, d).getDay();
+      const nextStatus =
+        current.status === 'closed'
+          ? 'open'
+          : dow !== 5 && dow !== 6
+          ? 'open'
+          : current.status;
+
+      return {
+        ...prev,
+        [dateISO]: {
+          ...current,
+          status: nextStatus,
+          extraSlots: [...existingExtra, slotLabel],
+        },
+      };
+    });
+    showSavedFeedback();
+  };
+
+  const removeCustomSlotFromDate = (dateISO, slotLabel) => {
+    setScheduleOverrides((prev) => {
+      const current = prev[dateISO] || { extraSlots: [], blockedSlots: [] };
+      return {
+        ...prev,
+        [dateISO]: {
+          ...current,
+          extraSlots: (current.extraSlots || []).filter((s) => s !== slotLabel),
+          blockedSlots: (current.blockedSlots || []).filter((s) => s !== slotLabel),
+        },
+      };
+    });
     showSavedFeedback();
   };
 
@@ -895,6 +1046,17 @@ export default function App() {
   // VISTA 1: PERFIL PRIVADO DE VALENTINA (PROTEGIDO CON PIN)
   // =========================================================================
   if (isAdmin) {
+    const [ay, am, ad] = adminSelectedDate.split('-').map(Number);
+    const adminDateObj = new Date(ay, am - 1, ad);
+    const adminDow = adminDateObj.getDay();
+    const adminDateIsOpen = isDateAvailableForClients(adminSelectedDate, adminDow);
+    const adminDateSlots = getSlotsForDate(adminSelectedDate);
+    const adminDateOverride = scheduleOverrides[adminSelectedDate] || {};
+    const adminMonthLabel = adminViewMonth.toLocaleDateString(lang === 'EN' ? 'en-US' : 'es-ES', {
+      month: 'long',
+      year: 'numeric',
+    });
+
     return (
       <div className="min-h-screen bg-[#F7F4EF] text-[#222120] font-sans pb-20">
         {/* Barra Superior Privada */}
@@ -930,17 +1092,17 @@ export default function App() {
         {savedBanner && (
           <div className="fixed bottom-6 right-6 z-50 bg-[#222120] text-white border border-[#C5A059] px-5 py-3 shadow-xl text-xs uppercase tracking-widest flex items-center gap-2">
             <Check size={16} className="text-[#C5A059]" />
-            {lang === 'EN' ? 'Saved automatically' : 'Guardado automáticamente'}
+            {lang === 'EN' ? 'Changes saved' : 'Cambios guardados'}
           </div>
         )}
 
         <main className="max-w-5xl mx-auto px-4 sm:px-8 pt-6 space-y-6">
-          {/* Navegación interna del Perfil Privado */}
+          {/* Pestañas del Perfil Privado */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {[
-              { id: 'catalog', labelEN: 'Prices & Photos', labelES: 'Precios y Fotos' },
+              { id: 'catalog', labelEN: 'Services & Photos', labelES: 'Servicios y Fotos' },
+              { id: 'agenda', labelEN: 'Days & Slots', labelES: 'Días y Cupos' },
               { id: 'policies', labelEN: '50% Conditions', labelES: 'Condiciones 50%' },
-              { id: 'agenda', labelEN: 'Agenda & Blocks', labelES: 'Agenda y Bloqueos' },
               { id: 'security', labelEN: 'Google & PIN', labelES: 'Google y PIN' },
             ].map((tab) => (
               <button
@@ -957,9 +1119,156 @@ export default function App() {
             ))}
           </div>
 
-          {/* TAB 1: PRECIOS Y FOTOGRAFÍAS */}
+          {/* =============================================================== */}
+          {/* TAB 1: AGREGAR SERVICIOS, EDITAR PRECIOS Y SUBIR FOTOS          */}
+          {/* =============================================================== */}
           {adminTab === 'catalog' && (
             <div className="space-y-6">
+              {/* Formulario completo para agregar nuevo servicio */}
+              <form
+                onSubmit={handleCreateService}
+                className="bg-white border border-[#DDD6CC] p-5 sm:p-6 space-y-4"
+              >
+                <div className="border-b border-[#DDD6CC] pb-3">
+                  <h2 className="font-serif text-2xl">
+                    {lang === 'EN' ? 'Add New Service' : 'Agregar Nuevo Servicio'}
+                  </h2>
+                  <p className="text-xs text-gray-500">
+                    {lang === 'EN'
+                      ? 'Create a new treatment with price, duration, description, and optional photo.'
+                      : 'Crea un servicio nuevo con precio, duración, descripción y fotografía opcional.'}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                  <div>
+                    <label className="block text-[11px] uppercase tracking-wider text-gray-500 mb-1">
+                      {lang === 'EN' ? 'Category' : 'Categoría'}
+                    </label>
+                    <select
+                      value={newSrvCat}
+                      onChange={(e) => setNewSrvCat(e.target.value)}
+                      className="w-full p-3 border border-[#DDD6CC] bg-[#F7F4EF] text-sm"
+                    >
+                      <option value="lashes">Lashes</option>
+                      <option value="eyebrow">Eyebrow</option>
+                      <option value="waxing">Waxing</option>
+                      <option value="facial">Facial</option>
+                      <option value="nails">Nails</option>
+                    </select>
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label className="block text-[11px] uppercase tracking-wider text-gray-500 mb-1">
+                      {lang === 'EN' ? 'Service Name *' : 'Nombre del Servicio *'}
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={newSrvName}
+                      onChange={(e) => setNewSrvName(e.target.value)}
+                      placeholder="e.g. Fox Eye Set / Soft Gel"
+                      className="w-full p-3 border border-[#DDD6CC] bg-[#F7F4EF] text-sm"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[11px] uppercase tracking-wider text-gray-500 mb-1">
+                        {lang === 'EN' ? 'Price ($) *' : 'Precio ($) *'}
+                      </label>
+                      <input
+                        type="number"
+                        required
+                        min="1"
+                        value={newSrvPrice}
+                        onChange={(e) => setNewSrvPrice(e.target.value)}
+                        placeholder="75"
+                        className="w-full p-3 border border-[#DDD6CC] bg-[#F7F4EF] text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] uppercase tracking-wider text-gray-500 mb-1">
+                        {lang === 'EN' ? 'Duration' : 'Duración'}
+                      </label>
+                      <input
+                        type="text"
+                        value={newSrvDuration}
+                        onChange={(e) => setNewSrvDuration(e.target.value)}
+                        placeholder="2h 30m"
+                        className="w-full p-3 border border-[#DDD6CC] bg-[#F7F4EF] text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] uppercase tracking-wider text-gray-500 mb-1">
+                      {lang === 'EN' ? 'Description (English)' : 'Descripción (Inglés)'}
+                    </label>
+                    <input
+                      type="text"
+                      value={newSrvDescEN}
+                      onChange={(e) => setNewSrvDescEN(e.target.value)}
+                      placeholder="Short description for English clients..."
+                      className="w-full p-3 border border-[#DDD6CC] bg-[#F7F4EF] text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] uppercase tracking-wider text-gray-500 mb-1">
+                      {lang === 'EN' ? 'Description (Spanish)' : 'Descripción (Español)'}
+                    </label>
+                    <input
+                      type="text"
+                      value={newSrvDescES}
+                      onChange={(e) => setNewSrvDescES(e.target.value)}
+                      placeholder="Descripción corta en español..."
+                      className="w-full p-3 border border-[#DDD6CC] bg-[#F7F4EF] text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+                  <div className="flex items-center gap-3">
+                    <label className="cursor-pointer px-4 py-2.5 bg-[#F7F4EF] border border-[#DDD6CC] hover:border-[#222120] text-xs uppercase tracking-widest font-semibold flex items-center gap-2">
+                      <Camera size={15} />
+                      <span>
+                        {newSrvImage
+                          ? lang === 'EN'
+                            ? 'Photo Selected ✓'
+                            : 'Foto Lista ✓'
+                          : lang === 'EN'
+                          ? 'Attach Photo (Optional)'
+                          : 'Adjuntar Foto (Opcional)'}
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) =>
+                          compressImageFile(e.target.files?.[0], (b64) => setNewSrvImage(b64))
+                        }
+                      />
+                    </label>
+                    {newSrvImage && (
+                      <img
+                        src={newSrvImage}
+                        alt="Preview"
+                        className="w-11 h-11 object-cover border border-[#DDD6CC]"
+                      />
+                    )}
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="px-6 py-3 bg-[#222120] text-white text-xs uppercase tracking-widest font-semibold flex items-center gap-2 hover:bg-black"
+                  >
+                    <Plus size={15} /> {lang === 'EN' ? 'Publish Service' : 'Publicar Servicio'}
+                  </button>
+                </div>
+              </form>
+
               {/* Interruptor categoría Uñas */}
               <div className="bg-white border border-[#DDD6CC] p-5 flex flex-wrap items-center justify-between gap-4">
                 <div>
@@ -993,45 +1302,7 @@ export default function App() {
                 </button>
               </div>
 
-              {/* Agregar nuevo servicio */}
-              <form
-                onSubmit={handleAddNewService}
-                className="bg-white border border-[#DDD6CC] p-5 grid grid-cols-1 sm:grid-cols-4 gap-3"
-              >
-                <select
-                  value={newServiceCat}
-                  onChange={(e) => setNewServiceCat(e.target.value)}
-                  className="p-3 border border-[#DDD6CC] bg-[#F7F4EF] text-sm"
-                >
-                  <option value="lashes">Lashes</option>
-                  <option value="eyebrow">Eyebrow</option>
-                  <option value="waxing">Waxing</option>
-                  <option value="facial">Facial</option>
-                  <option value="nails">Nails</option>
-                </select>
-                <input
-                  type="text"
-                  value={newServiceName}
-                  onChange={(e) => setNewServiceName(e.target.value)}
-                  placeholder={lang === 'EN' ? 'New service name...' : 'Nombre del servicio...'}
-                  className="p-3 border border-[#DDD6CC] text-sm"
-                />
-                <input
-                  type="number"
-                  value={newServicePrice}
-                  onChange={(e) => setNewServicePrice(e.target.value)}
-                  placeholder="Price ($)"
-                  className="p-3 border border-[#DDD6CC] text-sm"
-                />
-                <button
-                  type="submit"
-                  className="bg-[#222120] text-white text-xs uppercase tracking-widest font-semibold py-3 px-4 flex items-center justify-center gap-1.5 hover:bg-black"
-                >
-                  <Plus size={15} /> {lang === 'EN' ? 'Add Service' : 'Agregar'}
-                </button>
-              </form>
-
-              {/* Listado completo para editar precios y subir fotos */}
+              {/* Listado completo para editar precios, subir fotos o eliminar */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {services.map((srv) => (
                   <div
@@ -1067,7 +1338,7 @@ export default function App() {
 
                       <div className="min-w-0">
                         <span className="text-[10px] uppercase tracking-widest text-[#C5A059] font-semibold block">
-                          {srv.category}
+                          {srv.category} · {srv.duration}
                         </span>
                         <p className="font-medium text-sm truncate">{srv.name}</p>
                         <div className="flex items-center gap-1 mt-1.5">
@@ -1082,23 +1353,316 @@ export default function App() {
                       </div>
                     </div>
 
-                    <label className="cursor-pointer shrink-0 px-3 py-2.5 bg-[#222120] text-white text-xs uppercase tracking-wider font-semibold flex items-center gap-1.5 hover:bg-black">
-                      <Camera size={14} />
-                      <span>{srv.image ? (lang === 'EN' ? 'Change' : 'Cambiar') : lang === 'EN' ? 'Photo' : 'Foto'}</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => handleUploadServicePhoto(srv.id, e.target.files?.[0])}
-                      />
-                    </label>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <label className="cursor-pointer px-3 py-2.5 bg-[#222120] text-white text-xs uppercase tracking-wider font-semibold flex items-center gap-1.5 hover:bg-black">
+                        <Camera size={14} />
+                        <span>
+                          {srv.image ? (lang === 'EN' ? 'Change' : 'Cambiar') : lang === 'EN' ? 'Photo' : 'Foto'}
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) =>
+                            compressImageFile(e.target.files?.[0], (b64) => {
+                              setServices((prev) =>
+                                prev.map((s) => (s.id === srv.id ? { ...s, image: b64 } : s))
+                              );
+                              showSavedFeedback();
+                            })
+                          }
+                        />
+                      </label>
+                      <button
+                        onClick={() => handleDeleteService(srv.id)}
+                        title={lang === 'EN' ? 'Delete service' : 'Eliminar servicio'}
+                        className="p-2.5 border border-[#DDD6CC] text-gray-500 hover:text-red-700 hover:border-red-700"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* TAB 2: CONDICIONES Y DEPÓSITO 50% NO REEMBOLSABLE */}
+          {/* =============================================================== */}
+          {/* TAB 2: ABRIR DÍAS, AGREGAR CUPOS Y MARCAR DÍAS NO DISPONIBLES   */}
+          {/* =============================================================== */}
+          {adminTab === 'agenda' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                {/* Calendario Interactivo de Control */}
+                <div className="lg:col-span-6 bg-white border border-[#DDD6CC] p-5 space-y-4">
+                  <div>
+                    <h2 className="font-serif text-2xl">
+                      {lang === 'EN' ? 'Manage Days & Availability' : 'Control de Días Disponibles'}
+                    </h2>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {lang === 'EN'
+                        ? 'Tap any date to open an extra day, mark a day unavailable, or customize time slots.'
+                        : 'Toca cualquier fecha para abrir un día extra, marcarlo como no disponible o agregar cupos.'}
+                    </p>
+                  </div>
+
+                  <div className="border border-[#DDD6CC] bg-[#F7F4EF] p-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <button
+                        onClick={() =>
+                          setAdminViewMonth(
+                            new Date(adminViewMonth.getFullYear(), adminViewMonth.getMonth() - 1, 1)
+                          )
+                        }
+                        className="p-2 bg-white border border-[#DDD6CC] hover:border-[#222120]"
+                      >
+                        <ChevronLeft size={16} />
+                      </button>
+                      <span className="font-serif text-xl capitalize">{adminMonthLabel}</span>
+                      <button
+                        onClick={() =>
+                          setAdminViewMonth(
+                            new Date(adminViewMonth.getFullYear(), adminViewMonth.getMonth() + 1, 1)
+                          )
+                        }
+                        className="p-2 bg-white border border-[#DDD6CC] hover:border-[#222120]"
+                      >
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-7 text-center text-[11px] uppercase tracking-wider text-gray-500 mb-2">
+                      {(lang === 'EN'
+                        ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+                        : ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+                      ).map((w) => (
+                        <div key={w}>{w}</div>
+                      ))}
+                    </div>
+
+                    <div className="grid grid-cols-7 gap-1.5">
+                      {adminCalendarDays.map((cell, idx) => {
+                        if (!cell) return <div key={`adm-empty-${idx}`} />;
+                        const selected = adminSelectedDate === cell.iso;
+                        return (
+                          <button
+                            key={cell.iso}
+                            onClick={() => setAdminSelectedDate(cell.iso)}
+                            className={`py-2.5 text-xs font-semibold border relative transition-all ${
+                              selected
+                                ? 'bg-[#222120] text-white border-[#222120] ring-2 ring-[#C5A059]'
+                                : cell.isOpen
+                                ? 'bg-white text-[#222120] border-[#C5A059]'
+                                : 'bg-[#EDEAE4]/60 text-gray-400 border-transparent hover:border-gray-400'
+                            }`}
+                          >
+                            {cell.day}
+                            {cell.isOpen && !selected && (
+                              <span className="block w-1.5 h-1.5 rounded-full bg-[#C5A059] mx-auto mt-0.5" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-4 text-[11px] text-gray-600">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-3 h-3 inline-block bg-white border border-[#C5A059]" />
+                      {lang === 'EN' ? 'Open Day' : 'Día Disponible'}
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-3 h-3 inline-block bg-[#EDEAE4]" />
+                      {lang === 'EN' ? 'Unavailable / Closed' : 'No Disponible / Cerrado'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Panel de edición del día seleccionado */}
+                <div className="lg:col-span-6 bg-white border border-[#DDD6CC] p-5 space-y-5">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#DDD6CC] pb-3">
+                    <div>
+                      <span className="text-[10px] uppercase tracking-widest text-[#C5A059] font-semibold block">
+                        {lang === 'EN' ? 'Selected Date' : 'Fecha Seleccionada'}
+                      </span>
+                      <h3 className="font-serif text-2xl">{adminSelectedDate}</h3>
+                    </div>
+
+                    <span
+                      className={`px-3 py-1 text-xs uppercase tracking-widest font-semibold ${
+                        adminDateIsOpen
+                          ? 'bg-emerald-50 text-emerald-900 border border-emerald-200'
+                          : 'bg-red-50 text-red-900 border border-red-200'
+                      }`}
+                    >
+                      {adminDateIsOpen
+                        ? lang === 'EN'
+                          ? 'Available'
+                          : 'Disponible'
+                        : lang === 'EN'
+                        ? 'Unavailable'
+                        : 'No Disponible'}
+                    </span>
+                  </div>
+
+                  {/* Botones para abrir el día o marcarlo como no disponible */}
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <button
+                      onClick={() => setDayStatus(adminSelectedDate, 'open')}
+                      className={`py-3 px-3 text-xs uppercase tracking-wider font-semibold border flex items-center justify-center gap-1.5 transition-colors ${
+                        adminDateIsOpen
+                          ? 'bg-emerald-800 text-white border-emerald-800'
+                          : 'bg-white text-[#222120] border-[#DDD6CC] hover:border-emerald-800'
+                      }`}
+                    >
+                      <CalendarCheck size={15} />
+                      {lang === 'EN' ? 'Open This Day' : 'Habilitar Día'}
+                    </button>
+
+                    <button
+                      onClick={() => setDayStatus(adminSelectedDate, 'closed')}
+                      className={`py-3 px-3 text-xs uppercase tracking-wider font-semibold border flex items-center justify-center gap-1.5 transition-colors ${
+                        !adminDateIsOpen
+                          ? 'bg-red-900 text-white border-red-900'
+                          : 'bg-white text-[#222120] border-[#DDD6CC] hover:border-red-900'
+                      }`}
+                    >
+                      <CalendarX size={15} />
+                      {lang === 'EN' ? 'Mark Unavailable' : 'Marcar No Disponible'}
+                    </button>
+                  </div>
+
+                  {/* Cupos / Horarios de esa fecha */}
+                  <div className="space-y-3">
+                    <p className="text-xs uppercase tracking-widest text-gray-600 font-semibold">
+                      {lang === 'EN'
+                        ? 'Time Slots for This Date (Tap to Block/Unblock)'
+                        : 'Cupos de Esta Fecha (Toca para Ocupar/Liberar)'}
+                    </p>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {adminDateSlots.map((slot) => {
+                        const isBlocked = adminDateOverride.blockedSlots?.includes(slot);
+                        const isExtra = adminDateOverride.extraSlots?.includes(slot);
+                        return (
+                          <div
+                            key={slot}
+                            className={`flex items-center justify-between border px-3 py-2.5 text-xs font-semibold ${
+                              isBlocked
+                                ? 'bg-red-900 text-white border-red-900'
+                                : 'bg-[#F7F4EF] text-[#222120] border-[#DDD6CC]'
+                            }`}
+                          >
+                            <button
+                              onClick={() => toggleSlotBlockOnAdminDate(adminSelectedDate, slot)}
+                              className="flex-1 text-left"
+                            >
+                              {slot} {isBlocked ? '✕' : '✓'}
+                            </button>
+                            {isExtra && (
+                              <button
+                                onClick={() => removeCustomSlotFromDate(adminSelectedDate, slot)}
+                                title="Remove custom slot"
+                                className="ml-1.5 opacity-75 hover:opacity-100"
+                              >
+                                <X size={13} />
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Agregar cupo / horario extra a esa fecha */}
+                  <div className="pt-3 border-t border-[#DDD6CC] space-y-2.5">
+                    <label className="block text-xs uppercase tracking-widest text-gray-600 font-semibold">
+                      {lang === 'EN'
+                        ? 'Add Extra Time Slot to This Date'
+                        : 'Abrir Cupo / Hora Extra en Esta Fecha'}
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="time"
+                        value={customTime24}
+                        onChange={(e) => setCustomTime24(e.target.value)}
+                        className="flex-1 p-2.5 border border-[#DDD6CC] bg-[#F7F4EF] text-sm"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const formatted = format24To12Hour(customTime24);
+                          if (formatted) addCustomSlotToDate(adminSelectedDate, formatted);
+                        }}
+                        className="px-4 py-2.5 bg-[#222120] text-white text-xs uppercase tracking-widest font-semibold flex items-center gap-1.5 hover:bg-black"
+                      >
+                        <Plus size={14} /> {lang === 'EN' ? 'Add Slot' : 'Abrir Cupo'}
+                      </button>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {['10:30 AM', '2:00 PM', '6:30 PM', '7:00 PM'].map((preset) => (
+                        <button
+                          key={preset}
+                          type="button"
+                          onClick={() => addCustomSlotToDate(adminSelectedDate, preset)}
+                          className="px-2.5 py-1 bg-white border border-[#DDD6CC] hover:border-[#C5A059] text-[11px] font-medium"
+                        >
+                          + {preset}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Solicitudes recientes recibidas */}
+              <div className="bg-white border border-[#DDD6CC] p-5 space-y-3">
+                <h3 className="font-serif text-xl">
+                  {lang === 'EN' ? 'Logged DM Booking Requests' : 'Reservas Iniciadas hacia DM'}
+                </h3>
+                {bookings.length === 0 ? (
+                  <p className="text-xs text-gray-500 italic">
+                    {lang === 'EN'
+                      ? 'No appointments logged on this device yet.'
+                      : 'Aún no hay reservas registradas en este dispositivo.'}
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {bookings.map((b) => (
+                      <div
+                        key={b.id}
+                        className="p-3.5 bg-[#F7F4EF] border border-[#DDD6CC] text-xs space-y-1"
+                      >
+                        <div className="flex justify-between font-bold text-sm">
+                          <span>{b.clientName}</span>
+                          <span className="text-[#C5A059]">${b.total}</span>
+                        </div>
+                        <p>
+                          <strong>{b.date}</strong> · {b.time}
+                        </p>
+                        <p className="text-gray-600">{b.services}</p>
+                        <div className="flex justify-between items-center pt-2">
+                          <span className="text-gray-500">{b.clientIg}</span>
+                          <button
+                            onClick={() =>
+                              setBookings((prev) => prev.filter((item) => item.id !== b.id))
+                            }
+                            className="text-red-700 flex items-center gap-1 hover:underline"
+                          >
+                            <Trash2 size={12} /> {lang === 'EN' ? 'Remove' : 'Eliminar'}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* =============================================================== */}
+          {/* TAB 3: CONDICIONES Y DEPÓSITO 50% NO REEMBOLSABLE               */}
+          {/* =============================================================== */}
           {adminTab === 'policies' && (
             <div className="space-y-6">
               <div className="bg-white border border-[#DDD6CC] p-6 space-y-4">
@@ -1186,89 +1750,9 @@ export default function App() {
             </div>
           )}
 
-          {/* TAB 3: AGENDA Y BLOQUEO DE HORARIOS */}
-          {adminTab === 'agenda' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white border border-[#DDD6CC] p-6 space-y-4">
-                <h2 className="font-serif text-xl">
-                  {lang === 'EN' ? 'Upcoming DM Requests' : 'Solicitudes Recientes'}
-                </h2>
-                {bookings.length === 0 ? (
-                  <p className="text-sm text-gray-500 italic">
-                    {lang === 'EN'
-                      ? 'No appointments logged on this device yet.'
-                      : 'Aún no hay reservas registradas en este dispositivo.'}
-                  </p>
-                ) : (
-                  <div className="space-y-3">
-                    {bookings.map((b) => (
-                      <div key={b.id} className="p-3.5 bg-[#F7F4EF] border border-[#DDD6CC] text-xs space-y-1">
-                        <div className="flex justify-between font-bold text-sm">
-                          <span>{b.clientName}</span>
-                          <span className="text-[#C5A059]">${b.total}</span>
-                        </div>
-                        <p>
-                          <strong>{b.date}</strong> · {b.time}
-                        </p>
-                        <p className="text-gray-600">{b.services}</p>
-                        <div className="flex justify-between items-center pt-2">
-                          <span className="text-gray-500">{b.clientIg}</span>
-                          <button
-                            onClick={() =>
-                              setBookings((prev) => prev.filter((item) => item.id !== b.id))
-                            }
-                            className="text-red-700 flex items-center gap-1 hover:underline"
-                          >
-                            <Trash2 size={12} /> {lang === 'EN' ? 'Remove' : 'Eliminar'}
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="bg-white border border-[#DDD6CC] p-6 space-y-4">
-                <h2 className="font-serif text-xl">
-                  {lang === 'EN' ? 'Block / Unblock Friday & Saturday Slots' : 'Bloquear / Liberar Horarios'}
-                </h2>
-                <p className="text-xs text-gray-500">
-                  {lang === 'EN'
-                    ? 'Tap any upcoming Friday or Saturday time slot to block it manually.'
-                    : 'Toca cualquier bloque de viernes o sábado para ocuparlo manualmente.'}
-                </p>
-                <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
-                  {calendarDays
-                    .filter((d) => d && d.enabled)
-                    .map((d) => (
-                      <div key={d.iso} className="p-3 bg-[#F7F4EF] border border-[#DDD6CC]">
-                        <p className="text-xs font-bold uppercase tracking-wider mb-2">{d.iso}</p>
-                        <div className="grid grid-cols-3 gap-2">
-                          {TIME_SLOTS.map((slot) => {
-                            const blocked = blockedSlots.includes(`${d.iso}|${slot}`);
-                            return (
-                              <button
-                                key={slot}
-                                onClick={() => toggleBlockSlot(d.iso, slot)}
-                                className={`py-2 text-xs font-semibold border ${
-                                  blocked
-                                    ? 'bg-red-900 text-white border-red-900'
-                                    : 'bg-white text-[#222120] border-[#DDD6CC]'
-                                }`}
-                              >
-                                {slot} {blocked ? '✕' : ''}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 4: GOOGLE CALENDAR SYNC & CAMBIO DE PIN */}
+          {/* =============================================================== */}
+          {/* TAB 4: GOOGLE CALENDAR SYNC & CAMBIO DE PIN                     */}
+          {/* =============================================================== */}
           {adminTab === 'security' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-white border border-[#DDD6CC] p-6 space-y-4">
@@ -1283,7 +1767,7 @@ export default function App() {
                   value={scriptUrl}
                   onChange={(e) => {
                     setScriptUrl(e.target.value);
-                    localStorage.setItem('tina_studio_script_v3', e.target.value);
+                    localStorage.setItem('tina_studio_script_v4', e.target.value);
                     showSavedFeedback();
                   }}
                   placeholder="https://script.google.com/macros/s/.../exec"
@@ -1297,8 +1781,8 @@ export default function App() {
                 </h2>
                 <p className="text-xs text-gray-600">
                   {lang === 'EN'
-                    ? 'Current PIN protects your prices, photos, and conditions from public edits.'
-                    : 'Tu PIN protege precios, fotos y condiciones contra cambios no autorizados.'}
+                    ? 'Your 4-digit PIN protects prices, photos, days, and conditions from public edits.'
+                    : 'Tu PIN de 4 dígitos protege precios, fotos, días y condiciones contra cambios no autorizados.'}
                 </p>
                 <div className="flex gap-2">
                   <input
@@ -1313,7 +1797,7 @@ export default function App() {
                     onClick={() => {
                       if (newPinInput.length === 4) {
                         setAdminPin(newPinInput);
-                        localStorage.setItem('tina_studio_pin_v3', newPinInput);
+                        localStorage.setItem('tina_studio_pin_v4', newPinInput);
                         setNewPinInput('');
                         showSavedFeedback();
                       }
@@ -1344,12 +1828,13 @@ export default function App() {
       ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
       : ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
+  const slotsForSelectedDate = selectedDate ? getSlotsForDate(selectedDate) : [];
+
   return (
     <div className="min-h-screen bg-[#F7F4EF] text-[#222120] font-sans pb-24 sm:pb-12">
       {/* HEADER EDITORIAL */}
-      <header className="sticky top-0 z-30 bg-[#F7F4EF]/95 backdrop-blur-md border-b border-[#DDD6CC]">
+      <header className="sticky top-0 z-30 bg-[#F7F4EF]/95 backdrop-blur-sm border-b border-[#DDD6CC]">
         <div className="max-w-6xl mx-auto px-4 sm:px-8 py-3.5 grid grid-cols-3 items-center">
-          {/* Navegación izquierda */}
           <nav className="flex items-center gap-4 sm:gap-6 text-xs uppercase tracking-widest font-semibold">
             <a href="#services" className="hover:text-[#C5A059] transition-colors">
               {t.navServices}
@@ -1359,12 +1844,10 @@ export default function App() {
             </a>
           </nav>
 
-          {/* Logotipo Central Oficial */}
           <a href="#" className="flex justify-center">
             <TinaLogo size="header" />
           </a>
 
-          {/* Instagram & Selector de Idioma EN | ES */}
           <div className="flex items-center justify-end gap-2.5 sm:gap-4">
             <a
               href="https://www.instagram.com/tinastudioo/"
@@ -1419,7 +1902,6 @@ export default function App() {
 
       {/* SECCIÓN 1: CATÁLOGO DE SERVICIOS Y GUÍA VISUAL */}
       <section id="services" className="max-w-6xl mx-auto px-4 sm:px-8 py-12 sm:py-16">
-        {/* Filtros de Categoría */}
         <div className="flex items-center justify-start sm:justify-center gap-2 overflow-x-auto pb-4 mb-8">
           {[
             { id: 'all', label: t.catAll },
@@ -1443,7 +1925,6 @@ export default function App() {
           ))}
         </div>
 
-        {/* Grid de Servicios */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredServices.map((service) => {
             const isSelected = cartIds.includes(service.id);
@@ -1457,7 +1938,6 @@ export default function App() {
                 }`}
               >
                 <div>
-                  {/* Visual: Foto subida por Valentina o Ilustración Editorial de Pestañas */}
                   {service.image ? (
                     <div className="relative h-48 w-full overflow-hidden border-b border-[#DDD6CC] bg-[#EDEAE4]">
                       <img
@@ -1501,7 +1981,6 @@ export default function App() {
                     </div>
                   )}
 
-                  {/* Contenido del Servicio */}
                   <div className="p-5 space-y-2">
                     <div className="flex items-baseline justify-between gap-2">
                       <h3 className="font-serif text-2xl text-[#222120]">{service.name}</h3>
@@ -1515,7 +1994,6 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Acciones de la tarjeta */}
                 <div className="px-5 pb-5 pt-2 flex items-center gap-2">
                   <button
                     onClick={() => setSelectedServiceModal(service)}
@@ -1546,7 +2024,7 @@ export default function App() {
         </div>
       </section>
 
-      {/* SECCIÓN 2: AGENDA INTERACTIVA (CALENDARIO VIERNES Y SÁBADOS + DM INSTAGRAM) */}
+      {/* SECCIÓN 2: AGENDA INTERACTIVA */}
       <section id="booking" className="max-w-5xl mx-auto px-4 sm:px-8 pt-6 pb-12">
         <div className="bg-white border border-[#DDD6CC] p-6 sm:p-10 shadow-sm">
           <div className="text-center max-w-xl mx-auto mb-8 space-y-2">
@@ -1557,30 +2035,34 @@ export default function App() {
             <p className="text-xs sm:text-sm text-gray-500">{t.bookingSubtitle}</p>
           </div>
 
-          {/* Barra de Progreso de 3 Pasos */}
           <div className="grid grid-cols-3 border-b border-[#DDD6CC] pb-4 mb-8 text-center text-[11px] sm:text-xs uppercase tracking-widest font-semibold">
             <button
               onClick={() => setBookingStep(1)}
-              className={bookingStep === 1 ? 'text-[#222120] underline underline-offset-8' : 'text-gray-400'}
+              className={
+                bookingStep === 1 ? 'text-[#222120] underline underline-offset-8' : 'text-gray-400'
+              }
             >
               {t.step1}
             </button>
             <button
               onClick={() => selectedDate && selectedTime && setBookingStep(2)}
-              className={bookingStep === 2 ? 'text-[#222120] underline underline-offset-8' : 'text-gray-400'}
+              className={
+                bookingStep === 2 ? 'text-[#222120] underline underline-offset-8' : 'text-gray-400'
+              }
             >
               {t.step2}
             </button>
             <button
               onClick={() => selectedDate && selectedTime && clientName && setBookingStep(3)}
-              className={bookingStep === 3 ? 'text-[#222120] underline underline-offset-8' : 'text-gray-400'}
+              className={
+                bookingStep === 3 ? 'text-[#222120] underline underline-offset-8' : 'text-gray-400'
+              }
             >
               {t.step3}
             </button>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Columna Izquierda: Pasos interactivos */}
             <div className="lg:col-span-7 space-y-6">
               {bookingStep === 1 && (
                 <div className="space-y-6">
@@ -1588,7 +2070,6 @@ export default function App() {
                     {t.selectFridaySat}
                   </p>
 
-                  {/* Calendario Visual Mensual */}
                   <div className="border border-[#DDD6CC] bg-[#F7F4EF] p-4">
                     <div className="flex items-center justify-between mb-4">
                       <button
@@ -1643,14 +2124,13 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Bloques Horarios Estrictos: 9:00 AM, 12:30 PM, 4:00 PM */}
                   {selectedDate && (
                     <div className="space-y-3">
                       <p className="text-xs uppercase tracking-widest text-gray-600 font-semibold">
                         {t.availableSlots} — <span className="text-[#C5A059]">{selectedDate}</span>
                       </p>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        {TIME_SLOTS.map((slot) => {
+                        {slotsForSelectedDate.map((slot) => {
                           const unavailable = isSlotUnavailable(selectedDate, slot);
                           const chosen = selectedTime === slot;
                           return (
@@ -1750,7 +2230,6 @@ export default function App() {
 
               {bookingStep === 3 && (
                 <div className="space-y-5">
-                  {/* Política del 50% No Reembolsable */}
                   <div className="p-4 bg-[#F3DCE0]/45 border border-[#F3DCE0] space-y-3">
                     <p className="text-xs sm:text-sm font-medium text-[#222120] leading-relaxed">
                       {globalPolicy[lang]}
@@ -1772,7 +2251,6 @@ export default function App() {
                     </div>
                   )}
 
-                  {/* CTA Principal: Instagram DM (@tinastudioo) */}
                   <div className="space-y-3">
                     <a
                       href="https://www.instagram.com/tinastudioo/"
@@ -1920,7 +2398,7 @@ export default function App() {
       {selectedServiceModal && (
         <div
           onClick={() => setSelectedServiceModal(null)}
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
         >
           <div
             onClick={(e) => e.stopPropagation()}
@@ -1994,7 +2472,7 @@ export default function App() {
             setShowPinModal(false);
             setPinEntry('');
           }}
-          className="fixed inset-0 z-50 bg-black/65 backdrop-blur-xs flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/65 backdrop-blur-sm flex items-center justify-center p-4"
         >
           <div
             onClick={(e) => e.stopPropagation()}
@@ -2010,7 +2488,6 @@ export default function App() {
               <p className="text-xs text-gray-500 mt-1">{t.enterPinSub}</p>
             </div>
 
-            {/* Indicador visual de 4 dígitos */}
             <div className="flex justify-center gap-3 py-2">
               {[0, 1, 2, 3].map((idx) => (
                 <span
@@ -2024,7 +2501,6 @@ export default function App() {
               ))}
             </div>
 
-            {/* Teclado numérico */}
             <div className="grid grid-cols-3 gap-2">
               {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((digit) => (
                 <button
