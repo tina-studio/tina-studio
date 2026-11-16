@@ -4688,7 +4688,7 @@ export default function App() {
       <footer className="bg-[#F7F4EF] border-t border-[#DDD6CC] py-10 px-4 text-center">
         const TinaLogo = () => (
   <img 
-    src="/logo.png" /* Cambia esto a /logo.jpg si usas ese formato */
+    src="/tina studio (1).png" /* Cambia esto a /logo.jpg si usas ese formato */
     alt="TINA STUDIO by Valentina Arraiz" 
     className="h-16 md:h-20 w-auto object-contain"
   />
