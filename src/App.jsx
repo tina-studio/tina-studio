@@ -47,10 +47,10 @@ const DEFAULT_POLICY = {
 };
 
 const TinaLogo = () => (
-  <img
-    src="/logo.png"
-    alt="TINA STUDIO by Valentina Arraiz"
-    className="h-14 md:h-20 w-auto object-contain mx-auto transition-all"
+  <img 
+    src="/tina studio (1).png" 
+    alt="TINA STUDIO by Valentina Arraiz" 
+    className="w-full max-w-[210px] md:max-w-[260px] h-auto object-contain mx-auto my-1 transition-all"
   />
 );
 
