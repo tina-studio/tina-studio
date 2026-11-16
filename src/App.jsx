@@ -17,8 +17,19 @@ import {
   Eye,
   CalendarCheck,
   CalendarX,
+  Loader2,
+  RefreshCw,
+  MessageSquare,
+  CreditCard,
+  Copy,
+  Phone,
 } from 'lucide-react';
 import tinaLogo from '../tina studio (1).png';
+
+// ============================================================================
+// PEGA AQUÍ LA URL /exec DE GOOGLE APPS SCRIPT PARA SINCRONIZAR EN TODOS LOS TELÉFONOS
+// ============================================================================
+const GOOGLE_SCRIPT_URL = 'PEGA_AQUI_TU_URL_EXEC';
 
 // --- LOGOTIPO OFICIAL DE TINA STUDIO ---
 const TinaLogo = ({ size = 'header' }) => (
@@ -97,9 +108,8 @@ const LashStyleDiagram = ({ variant = 'classic' }) => {
   );
 };
 
-// --- CATÁLOGO BASE ---
+// --- CATÁLOGO BASE (APARTADO DE $20 NO REEMBOLSABLE) ---
 const INITIAL_SERVICES = [
-  // LASHES
   {
     id: 'lash-lifting',
     category: 'lashes',
@@ -110,8 +120,8 @@ const INITIAL_SERVICES = [
     variant: 'lifting',
     descEN: 'Natural lash curl and lift from the root for an effortless, wide-awake look lasting 6–8 weeks.',
     descES: 'Rizado y elevación natural desde la raíz para una mirada abierta sin extensiones (dura 6–8 semanas).',
-    policyEN: 'A 50% non-refundable deposit ($25) is required via Instagram DM to lock your date.',
-    policyES: 'Se requiere un depósito del 50% no reembolsable ($25) vía Instagram DM para reservar tu cupo.',
+    policyEN: 'A $20 non-refundable deposit is required to lock your appointment date.',
+    policyES: 'Se requiere un apartado de $20 no reembolsable para asegurar tu fecha.',
     image: '',
   },
   {
@@ -124,8 +134,8 @@ const INITIAL_SERVICES = [
     variant: 'classic',
     descEN: 'One single extension applied to each natural lash (1:1). Clean, timeless mascara-like elegance.',
     descES: 'Una extensión por cada pestaña natural (1:1). Acabado limpio, elegante y natural tipo rímel.',
-    policyEN: 'A 50% non-refundable deposit ($30) is required via Instagram DM to lock your date.',
-    policyES: 'Se requiere un depósito del 50% no reembolsable ($30) vía Instagram DM para reservar tu cupo.',
+    policyEN: 'A $20 non-refundable deposit is required to lock your appointment date.',
+    policyES: 'Se requiere un apartado de $20 no reembolsable para asegurar tu fecha.',
     image: '',
   },
   {
@@ -138,8 +148,8 @@ const INITIAL_SERVICES = [
     variant: 'hybrid',
     descEN: '50/50 blend of Classic single lashes and soft Volume fans for balanced texture and fullness.',
     descES: 'Mezcla 50/50 de fibras Clásicas y abanicos de Volumen suave para lograr textura y densidad equilibrada.',
-    policyEN: 'A 50% non-refundable deposit ($32.50) is required via Instagram DM to lock your date.',
-    policyES: 'Se requiere un depósito del 50% no reembolsable ($32.50) vía Instagram DM para reservar tu cupo.',
+    policyEN: 'A $20 non-refundable deposit is required to lock your appointment date.',
+    policyES: 'Se requiere un apartado de $20 no reembolsable para asegurar tu fecha.',
     image: '',
   },
   {
@@ -152,8 +162,8 @@ const INITIAL_SERVICES = [
     variant: 'wispy',
     descEN: 'Feathery, staggered peaks paired with soft base lashes for an airy, textured editorial finish.',
     descES: 'Picos escalonados ligeros combinados con una base suave para un efecto plumoso y texturizado.',
-    policyEN: 'A 50% non-refundable deposit ($32.50) is required via Instagram DM to lock your date.',
-    policyES: 'Se requiere un depósito del 50% no reembolsable ($32.50) vía Instagram DM para reservar tu cupo.',
+    policyEN: 'A $20 non-refundable deposit is required to lock your appointment date.',
+    policyES: 'Se requiere un apartado de $20 no reembolsable para asegurar tu fecha.',
     image: '',
   },
   {
@@ -166,8 +176,8 @@ const INITIAL_SERVICES = [
     variant: 'wet',
     descEN: 'Closed lightweight volume fans creating a glossy, sleek, freshly-coated lash aesthetic.',
     descES: 'Abanicos cerrados ultraligeros que crean un efecto brillante, definido y estilizado.',
-    policyEN: 'A 50% non-refundable deposit ($32.50) is required via Instagram DM to lock your date.',
-    policyES: 'Se requiere un depósito del 50% no reembolsable ($32.50) vía Instagram DM para reservar tu cupo.',
+    policyEN: 'A $20 non-refundable deposit is required to lock your appointment date.',
+    policyES: 'Se requiere un apartado de $20 no reembolsable para asegurar tu fecha.',
     image: '',
   },
   {
@@ -180,8 +190,8 @@ const INITIAL_SERVICES = [
     variant: 'hawaiian',
     descEN: 'Soft, wispy curl with subtle cat-eye elongation for a breezy, sun-kissed gaze.',
     descES: 'Curvatura suave y abierta con ligero alargamiento externo para una mirada luminosa.',
-    policyEN: 'A 50% non-refundable deposit ($35) is required via Instagram DM to lock your date.',
-    policyES: 'Se requiere un depósito del 50% no reembolsable ($35) vía Instagram DM para reservar tu cupo.',
+    policyEN: 'A $20 non-refundable deposit is required to lock your appointment date.',
+    policyES: 'Se requiere un apartado de $20 no reembolsable para asegurar tu fecha.',
     image: '',
   },
   {
@@ -194,8 +204,8 @@ const INITIAL_SERVICES = [
     variant: 'egypt',
     descEN: 'Defined eyeliner effect with sculpted peaks and rich dark lash-line density.',
     descES: 'Efecto delineado definido con picos esculpidos y mayor densidad en la línea de las pestañas.',
-    policyEN: 'A 50% non-refundable deposit ($35) is required via Instagram DM to lock your date.',
-    policyES: 'Se requiere un depósito del 50% no reembolsable ($35) vía Instagram DM para reservar tu cupo.',
+    policyEN: 'A $20 non-refundable deposit is required to lock your appointment date.',
+    policyES: 'Se requiere un apartado de $20 no reembolsable para asegurar tu fecha.',
     image: '',
   },
   {
@@ -208,8 +218,8 @@ const INITIAL_SERVICES = [
     variant: 'volume',
     descEN: 'Handmade plush multi-lash fans applied to each natural lash for fluffy, glamorous fullness.',
     descES: 'Abanicos artesanales esponjosos en cada pestaña natural para un volumen glamoroso y uniforme.',
-    policyEN: 'A 50% non-refundable deposit ($40) is required via Instagram DM to lock your date.',
-    policyES: 'Se requiere un depósito del 50% no reembolsable ($40) vía Instagram DM para reservar tu cupo.',
+    policyEN: 'A $20 non-refundable deposit is required to lock your appointment date.',
+    policyES: 'Se requiere un apartado de $20 no reembolsable para asegurar tu fecha.',
     image: '',
   },
   {
@@ -222,8 +232,8 @@ const INITIAL_SERVICES = [
     variant: 'megavolume',
     descEN: 'Ultra-fine dense fans delivering maximum drama, darkness, and red-carpet intensity.',
     descES: 'Abanicos ultrafinos de alta densidad para máximo drama, profundidad e intensidad.',
-    policyEN: 'A 50% non-refundable deposit ($45) is required via Instagram DM to lock your date.',
-    policyES: 'Se requiere un depósito del 50% no reembolsable ($45) vía Instagram DM para reservar tu cupo.',
+    policyEN: 'A $20 non-refundable deposit is required to lock your appointment date.',
+    policyES: 'Se requiere un apartado de $20 no reembolsable para asegurar tu fecha.',
     image: '',
   },
   {
@@ -236,8 +246,8 @@ const INITIAL_SERVICES = [
     variant: 'wispyvolume',
     descEN: 'Full-bodied Russian volume base elevated with dramatic, fluttery Kim-K style spikes.',
     descES: 'Base completa de volumen ruso realzada con picos largos y llamativos estilo Kim-K.',
-    policyEN: 'A 50% non-refundable deposit ($42.50) is required via Instagram DM to lock your date.',
-    policyES: 'Se requiere un depósito del 50% no reembolsable ($42.50) vía Instagram DM para reservar tu cupo.',
+    policyEN: 'A $20 non-refundable deposit is required to lock your appointment date.',
+    policyES: 'Se requiere un apartado de $20 no reembolsable para asegurar tu fecha.',
     image: '',
   },
   {
@@ -250,8 +260,8 @@ const INITIAL_SERVICES = [
     variant: 'refill',
     descEN: 'Maintenance infill within 2–3 weeks (requires at least 40% of extensions remaining).',
     descES: 'Mantenimiento y relleno dentro de 2–3 semanas (requiere conservar al menos 40% de extensiones).',
-    policyEN: 'A 50% non-refundable deposit ($30) is required via Instagram DM to lock your date.',
-    policyES: 'Se requiere un depósito del 50% no reembolsable ($30) vía Instagram DM para reservar tu cupo.',
+    policyEN: 'A $20 non-refundable deposit is required to lock your appointment date.',
+    policyES: 'Se requiere un apartado de $20 no reembolsable para asegurar tu fecha.',
     image: '',
   },
   {
@@ -264,12 +274,10 @@ const INITIAL_SERVICES = [
     variant: 'remove',
     descEN: 'Gentle cream removal that protects and nourishes your natural lashes without damage.',
     descES: 'Retiro suave en crema que cuida y protege tus pestañas naturales sin maltratarlas.',
-    policyEN: 'A 50% non-refundable deposit ($20) is required via Instagram DM to lock your date.',
-    policyES: 'Se requiere un depósito del 50% no reembolsable ($20) vía Instagram DM para reservar tu cupo.',
+    policyEN: 'A $20 non-refundable deposit is required to lock your appointment date.',
+    policyES: 'Se requiere un apartado de $20 no reembolsable para asegurar tu fecha.',
     image: '',
   },
-
-  // EYEBROW
   {
     id: 'brow-lamination',
     category: 'eyebrow',
@@ -278,8 +286,8 @@ const INITIAL_SERVICES = [
     duration: '45m',
     descEN: 'Brow restructuring treatment that smooths, lifts, and sets hairs into a fuller, brushed-up shape.',
     descES: 'Tratamiento reestructurante que alisa, peina y fija las cejas logrando un aspecto más poblado.',
-    policyEN: 'A 50% non-refundable deposit ($10) is required via Instagram DM to lock your date.',
-    policyES: 'Se requiere un depósito del 50% no reembolsable ($10) vía Instagram DM para reservar tu cupo.',
+    policyEN: 'A $20 non-refundable deposit is required to lock your appointment date.',
+    policyES: 'Se requiere un apartado de $20 no reembolsable para asegurar tu fecha.',
     image: '',
   },
   {
@@ -290,12 +298,10 @@ const INITIAL_SERVICES = [
     duration: '45m',
     descEN: 'Precision facial geometry brow mapping followed by gentle waxing for symmetrical arches.',
     descES: 'Diseño geométrico personalizado según tu rostro seguido de depilación precisa con cera.',
-    policyEN: 'A 50% non-refundable deposit ($17.50) is required via Instagram DM to lock your date.',
-    policyES: 'Se requiere un depósito del 50% no reembolsable ($17.50) vía Instagram DM para reservar tu cupo.',
+    policyEN: 'A $20 non-refundable deposit is required to lock your appointment date.',
+    policyES: 'Se requiere un apartado de $20 no reembolsable para asegurar tu fecha.',
     image: '',
   },
-
-  // WAXING
   {
     id: 'wax-arm',
     category: 'waxing',
@@ -304,8 +310,8 @@ const INITIAL_SERVICES = [
     duration: '30m',
     descEN: 'Smooth full-arm hair removal using gentle, skin-soothing wax.',
     descES: 'Depilación completa de brazos con cera suave que cuida la piel.',
-    policyEN: 'A 50% non-refundable deposit is required via Instagram DM to confirm your slot.',
-    policyES: 'Se requiere un depósito del 50% no reembolsable vía Instagram DM para confirmar tu hora.',
+    policyEN: 'A $20 non-refundable deposit is required to lock your appointment date.',
+    policyES: 'Se requiere un apartado de $20 no reembolsable para asegurar tu fecha.',
     image: '',
   },
   {
@@ -316,8 +322,8 @@ const INITIAL_SERVICES = [
     duration: '20m',
     descEN: 'Quick, clean underarm waxing for silky, long-lasting smoothness.',
     descES: 'Depilación rápida y limpia de axilas para una suavidad duradera.',
-    policyEN: 'A 50% non-refundable deposit is required via Instagram DM to confirm your slot.',
-    policyES: 'Se requiere un depósito del 50% no reembolsable vía Instagram DM para confirmar tu hora.',
+    policyEN: 'A $20 non-refundable deposit is required to lock your appointment date.',
+    policyES: 'Se requiere un apartado de $20 no reembolsable para asegurar tu fecha.',
     image: '',
   },
   {
@@ -328,8 +334,8 @@ const INITIAL_SERVICES = [
     duration: '15m',
     descEN: 'Delicate upper-lip hair removal with soothing post-wax care.',
     descES: 'Depilación delicada de bozo con cuidado calmante posterior.',
-    policyEN: 'A 50% non-refundable deposit is required via Instagram DM to confirm your slot.',
-    policyES: 'Se requiere un depósito del 50% no reembolsable vía Instagram DM para confirmar tu hora.',
+    policyEN: 'A $20 non-refundable deposit is required to lock your appointment date.',
+    policyES: 'Se requiere un apartado de $20 no reembolsable para asegurar tu fecha.',
     image: '',
   },
   {
@@ -340,8 +346,8 @@ const INITIAL_SERVICES = [
     duration: '30m',
     descEN: 'Clean shaping along the classic bikini line with gentle low-temperature wax.',
     descES: 'Perfilado limpio de la línea clásica del bikini con cera suave de baja temperatura.',
-    policyEN: 'A 50% non-refundable deposit is required via Instagram DM to confirm your slot.',
-    policyES: 'Se requiere un depósito del 50% no reembolsable vía Instagram DM para confirmar tu hora.',
+    policyEN: 'A $20 non-refundable deposit is required to lock your appointment date.',
+    policyES: 'Se requiere un apartado de $20 no reembolsable para asegurar tu fecha.',
     image: '',
   },
   {
@@ -352,8 +358,8 @@ const INITIAL_SERVICES = [
     duration: '40m',
     descEN: 'Comprehensive bikini waxing tailored for comfort, hygiene, and smooth results.',
     descES: 'Depilación de bikini completo realizada con máxima higiene, confort y suavidad.',
-    policyEN: 'A 50% non-refundable deposit is required via Instagram DM to confirm your slot.',
-    policyES: 'Se requiere un depósito del 50% no reembolsable vía Instagram DM para confirmar tu hora.',
+    policyEN: 'A $20 non-refundable deposit is required to lock your appointment date.',
+    policyES: 'Se requiere un apartado de $20 no reembolsable para asegurar tu fecha.',
     image: '',
   },
   {
@@ -364,8 +370,8 @@ const INITIAL_SERVICES = [
     duration: '30m',
     descEN: 'Lower or upper leg waxing leaving skin soft and hair-free for weeks.',
     descES: 'Depilación de media pierna dejando la piel suave y libre de vello por semanas.',
-    policyEN: 'A 50% non-refundable deposit is required via Instagram DM to confirm your slot.',
-    policyES: 'Se requiere un depósito del 50% no reembolsable vía Instagram DM para confirmar tu hora.',
+    policyEN: 'A $20 non-refundable deposit is required to lock your appointment date.',
+    policyES: 'Se requiere un apartado de $20 no reembolsable para asegurar tu fecha.',
     image: '',
   },
   {
@@ -376,12 +382,10 @@ const INITIAL_SERVICES = [
     duration: '45m',
     descEN: 'Complete leg waxing from ankle to upper thigh with calming hydration.',
     descES: 'Depilación completa de piernas con hidratación calmante final.',
-    policyEN: 'A 50% non-refundable deposit is required via Instagram DM to confirm your slot.',
-    policyES: 'Se requiere un depósito del 50% no reembolsable vía Instagram DM para confirmar tu hora.',
+    policyEN: 'A $20 non-refundable deposit is required to lock your appointment date.',
+    policyES: 'Se requiere un apartado de $20 no reembolsable para asegurar tu fecha.',
     image: '',
   },
-
-  // FACIAL
   {
     id: 'facial-extractions',
     category: 'facial',
@@ -390,12 +394,10 @@ const INITIAL_SERVICES = [
     duration: '40m',
     descEN: 'Deep pore cleansing, gentle steam, manual extractions, and hydrating glow mask.',
     descES: 'Limpieza profunda de poros, vapor suave, extracciones manuales y mascarilla hidratante luminosa.',
-    policyEN: 'A 50% non-refundable deposit ($20) is required via Instagram DM to confirm your slot.',
-    policyES: 'Se requiere un depósito del 50% no reembolsable ($20) vía Instagram DM para confirmar tu hora.',
+    policyEN: 'A $20 non-refundable deposit is required to lock your appointment date.',
+    policyES: 'Se requiere un apartado de $20 no reembolsable para asegurar tu fecha.',
     image: '',
   },
-
-  // NAILS (Oculto por defecto hasta que Valentina lo active)
   {
     id: 'nails-acrylic',
     category: 'nails',
@@ -404,8 +406,8 @@ const INITIAL_SERVICES = [
     duration: '2h 30m',
     descEN: 'Custom sculpted acrylic extensions with gel polish finish.',
     descES: 'Extensiones esculpidas en acrílico con acabado en esmalte semipermanente.',
-    policyEN: 'A 50% non-refundable deposit is required via Instagram DM to confirm your slot.',
-    policyES: 'Se requiere un depósito del 50% no reembolsable vía Instagram DM para confirmar tu hora.',
+    policyEN: 'A $20 non-refundable deposit is required to lock your appointment date.',
+    policyES: 'Se requiere un apartado de $20 no reembolsable para asegurar tu fecha.',
     image: '',
   },
   {
@@ -416,20 +418,26 @@ const INITIAL_SERVICES = [
     duration: '2h',
     descEN: 'Lightweight, natural-feeling soft gel nail extensions with glossy finish.',
     descES: 'Extensiones ligeras en soft gel con acabado brillante y natural.',
-    policyEN: 'A 50% non-refundable deposit is required via Instagram DM to confirm your slot.',
-    policyES: 'Se requiere un depósito del 50% no reembolsable vía Instagram DM para confirmar tu hora.',
+    policyEN: 'A $20 non-refundable deposit is required to lock your appointment date.',
+    policyES: 'Se requiere un apartado de $20 no reembolsable para asegurar tu fecha.',
     image: '',
   },
 ];
 
 const BASE_TIME_SLOTS = ['9:00 AM', '12:30 PM', '4:00 PM'];
+const DEPOSIT_AMOUNT = 20;
 
 const DEFAULT_GLOBAL_POLICY = {
-  EN: 'A 50% non-refundable deposit is required via Instagram DM (@tinastudioo) to secure your appointment.',
-  ES: 'Se requiere un depósito del 50% no reembolsable vía Instagram DM (@tinastudioo) para asegurar tu cita.',
+  EN: 'A $20 non-refundable deposit is required to lock your appointment. Send your payment receipt via Message to confirm.',
+  ES: 'Se requiere un apartado de $20 no reembolsable para asegurar tu cita. Envía tu comprobante por Mensaje para confirmar.',
 };
 
-// --- UTILIDADES DE FECHA Y HORA ---
+const DEFAULT_PAYMENT_METHODS = [
+  { id: 'pm-zelle', label: 'Zelle', value: 'tinastudio@email.com (Valentina Arraiz)' },
+  { id: 'pm-cashapp', label: 'Apple Pay / CashApp', value: '$tinastudioo' },
+];
+
+// --- UTILIDADES ---
 function formatDateISO(year, month, day) {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
@@ -455,20 +463,28 @@ function format24To12Hour(time24) {
   return `${h}:${mStr} ${period}`;
 }
 
-function compressImageFile(file, callback) {
+function buildSmsLink(phone, bodyText) {
+  const cleanPhone = (phone || '').replace(/[^\d+]/g, '');
+  const encodedBody = encodeURIComponent(bodyText);
+  return cleanPhone ? `sms:${cleanPhone}?body=${encodedBody}` : `sms:?body=${encodedBody}`;
+}
+
+function compressImageToBase64(file, callback) {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = (ev) => {
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      const maxWidth = 640;
+      const maxWidth = 800;
       const scale = Math.min(1, maxWidth / img.width);
       canvas.width = img.width * scale;
       canvas.height = img.height * scale;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      callback(canvas.toDataURL('image/jpeg', 0.8));
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+      const pureBase64 = dataUrl.split(',')[1];
+      callback({ dataUrl, pureBase64 });
     };
     img.src = ev.target.result;
   };
@@ -480,7 +496,7 @@ export default function App() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [selectedServiceModal, setSelectedServiceModal] = useState(null);
 
-  // Carrito y flujo de reserva
+  // Carrito vacío por defecto
   const [cartIds, setCartIds] = useState([]);
   const [bookingStep, setBookingStep] = useState(1);
   const [viewMonth, setViewMonth] = useState(() => {
@@ -493,33 +509,51 @@ export default function App() {
   const [clientIg, setClientIg] = useState('');
   const [clientNotes, setClientNotes] = useState('');
   const [policyAccepted, setPolicyAccepted] = useState(false);
-  const [copiedAlert, setCopiedAlert] = useState(false);
+  const [copiedKey, setCopiedKey] = useState('');
+  const [bookingFeedback, setBookingFeedback] = useState(false);
 
-  // Estados persistentes editables desde Perfil Privado
+  // Estados sincronizados con Google Drive/Sheets + caché local
   const [services, setServices] = useState(() => {
     try {
-      const saved = localStorage.getItem('tina_studio_services_v4');
+      const saved = localStorage.getItem('tina_studio_services_v6');
       return saved ? JSON.parse(saved) : INITIAL_SERVICES;
     } catch {
       return INITIAL_SERVICES;
     }
   });
   const [nailsEnabled, setNailsEnabled] = useState(() => {
-    return localStorage.getItem('tina_studio_nails_v4') === 'true';
+    try {
+      return localStorage.getItem('tina_studio_nails_v6') === 'true';
+    } catch {
+      return false;
+    }
   });
   const [globalPolicy, setGlobalPolicy] = useState(() => {
     try {
-      const saved = localStorage.getItem('tina_studio_policy_v4');
+      const saved = localStorage.getItem('tina_studio_policy_v6');
       return saved ? JSON.parse(saved) : DEFAULT_GLOBAL_POLICY;
     } catch {
       return DEFAULT_GLOBAL_POLICY;
     }
   });
-  // Control avanzado de días y cupos:
-  // scheduleOverrides[iso] = { status: 'open' | 'closed', extraSlots: string[], blockedSlots: string[] }
+  const [paymentMethods, setPaymentMethods] = useState(() => {
+    try {
+      const saved = localStorage.getItem('tina_studio_payments_v6');
+      return saved ? JSON.parse(saved) : DEFAULT_PAYMENT_METHODS;
+    } catch {
+      return DEFAULT_PAYMENT_METHODS;
+    }
+  });
+  const [studioPhone, setStudioPhone] = useState(() => {
+    try {
+      return localStorage.getItem('tina_studio_phone_v6') || '';
+    } catch {
+      return '';
+    }
+  });
   const [scheduleOverrides, setScheduleOverrides] = useState(() => {
     try {
-      const saved = localStorage.getItem('tina_studio_schedule_v4');
+      const saved = localStorage.getItem('tina_studio_schedule_v6');
       return saved ? JSON.parse(saved) : {};
     } catch {
       return {};
@@ -527,30 +561,55 @@ export default function App() {
   });
   const [bookings, setBookings] = useState(() => {
     try {
-      const saved = localStorage.getItem('tina_studio_bookings_v4');
+      const saved = localStorage.getItem('tina_studio_bookings_v6');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
     }
   });
   const [adminPin, setAdminPin] = useState(() => {
-    return localStorage.getItem('tina_studio_pin_v4') || '2026';
+    try {
+      return localStorage.getItem('tina_studio_pin_v6') || '2004';
+    } catch {
+      return '2004';
+    }
   });
-  const [scriptUrl, setScriptUrl] = useState(() => {
-    return localStorage.getItem('tina_studio_script_v4') || '';
+  const [customScriptUrl, setCustomScriptUrl] = useState(() => {
+    try {
+      return localStorage.getItem('tina_studio_script_v6') || '';
+    } catch {
+      return '';
+    }
   });
+
+  const activeScriptUrl = useMemo(() => {
+    if (customScriptUrl && customScriptUrl.startsWith('https://script.google.com')) {
+      return customScriptUrl;
+    }
+    if (GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL.startsWith('https://script.google.com')) {
+      return GOOGLE_SCRIPT_URL;
+    }
+    return '';
+  }, [customScriptUrl]);
+
   const [googleBusySlots, setGoogleBusySlots] = useState([]);
+  const [isSyncingCloud, setIsSyncingCloud] = useState(false);
+  const [uploadingPhotoId, setUploadingPhotoId] = useState(null);
 
   // Estados del Perfil Privado
   const [isAdmin, setIsAdmin] = useState(false);
   const [showPinModal, setShowPinModal] = useState(false);
   const [pinEntry, setPinEntry] = useState('');
   const [pinError, setPinError] = useState(false);
-  const [adminTab, setAdminTab] = useState('catalog'); // 'catalog' | 'agenda' | 'policies' | 'security'
+  const [adminTab, setAdminTab] = useState('catalog');
   const [newPinInput, setNewPinInput] = useState('');
-  const [savedBanner, setSavedBanner] = useState(false);
+  const [savedBanner, setSavedBanner] = useState('');
 
-  // Formulario para agregar nuevo servicio
+  // Nuevo método de pago en Perfil Privado
+  const [newPayLabel, setNewPayLabel] = useState('');
+  const [newPayValue, setNewPayValue] = useState('');
+
+  // Formulario nuevo servicio
   const [newSrvCat, setNewSrvCat] = useState('lashes');
   const [newSrvName, setNewSrvName] = useState('');
   const [newSrvPrice, setNewSrvPrice] = useState('');
@@ -558,8 +617,9 @@ export default function App() {
   const [newSrvDescEN, setNewSrvDescEN] = useState('');
   const [newSrvDescES, setNewSrvDescES] = useState('');
   const [newSrvImage, setNewSrvImage] = useState('');
+  const [isUploadingNewSrvImg, setIsUploadingNewSrvImg] = useState(false);
 
-  // Estados del gestor de calendario en el Perfil Privado
+  // Calendario admin
   const [adminViewMonth, setAdminViewMonth] = useState(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
@@ -570,47 +630,156 @@ export default function App() {
   });
   const [customTime24, setCustomTime24] = useState('18:30');
 
-  // Persistencia automática
+  // Guardar en caché local
   useEffect(() => {
-    localStorage.setItem('tina_studio_services_v4', JSON.stringify(services));
-  }, [services]);
-  useEffect(() => {
-    localStorage.setItem('tina_studio_nails_v4', String(nailsEnabled));
-  }, [nailsEnabled]);
-  useEffect(() => {
-    localStorage.setItem('tina_studio_policy_v4', JSON.stringify(globalPolicy));
-  }, [globalPolicy]);
-  useEffect(() => {
-    localStorage.setItem('tina_studio_schedule_v4', JSON.stringify(scheduleOverrides));
-  }, [scheduleOverrides]);
-  useEffect(() => {
-    localStorage.setItem('tina_studio_bookings_v4', JSON.stringify(bookings));
-  }, [bookings]);
+    try {
+      localStorage.setItem('tina_studio_services_v6', JSON.stringify(services));
+      localStorage.setItem('tina_studio_nails_v6', String(nailsEnabled));
+      localStorage.setItem('tina_studio_policy_v6', JSON.stringify(globalPolicy));
+      localStorage.setItem('tina_studio_payments_v6', JSON.stringify(paymentMethods));
+      localStorage.setItem('tina_studio_phone_v6', studioPhone);
+      localStorage.setItem('tina_studio_schedule_v6', JSON.stringify(scheduleOverrides));
+      localStorage.setItem('tina_studio_bookings_v6', JSON.stringify(bookings));
+      localStorage.setItem('tina_studio_pin_v6', adminPin);
+    } catch {}
+  }, [
+    services,
+    nailsEnabled,
+    globalPolicy,
+    paymentMethods,
+    studioPhone,
+    scheduleOverrides,
+    bookings,
+    adminPin,
+  ]);
 
-  // Leer disponibilidad desde Google Apps Script
-  useEffect(() => {
-    if (!scriptUrl) return;
-    fetch(scriptUrl)
+  // Cargar configuración global desde Google Drive/Sheets
+  const fetchCloudData = () => {
+    if (!activeScriptUrl) return;
+    setIsSyncingCloud(true);
+    fetch(activeScriptUrl)
       .then((res) => res.json())
       .then((data) => {
-        if (data && Array.isArray(data.busy)) {
-          setGoogleBusySlots(data.busy.map((b) => `${b.date}|${b.slot}`));
+        if (data && data.ok) {
+          if (Array.isArray(data.busy)) {
+            setGoogleBusySlots(data.busy.map((b) => `${b.date}|${b.slot}`));
+          }
+          if (data.config) {
+            if (Array.isArray(data.config.services) && data.config.services.length > 0) {
+              setServices(data.config.services);
+            }
+            if (typeof data.config.nailsEnabled === 'boolean') {
+              setNailsEnabled(data.config.nailsEnabled);
+            }
+            if (data.config.globalPolicy) {
+              setGlobalPolicy(data.config.globalPolicy);
+            }
+            if (Array.isArray(data.config.paymentMethods)) {
+              setPaymentMethods(data.config.paymentMethods);
+            }
+            if (typeof data.config.studioPhone === 'string') {
+              setStudioPhone(data.config.studioPhone);
+            }
+            if (data.config.scheduleOverrides) {
+              setScheduleOverrides(data.config.scheduleOverrides);
+            }
+            if (data.config.adminPin && String(data.config.adminPin).length === 4) {
+              setAdminPin(String(data.config.adminPin));
+            }
+          }
         }
       })
-      .catch(() => {});
-  }, [scriptUrl]);
-
-  const showSavedFeedback = () => {
-    setSavedBanner(true);
-    setTimeout(() => setSavedBanner(false), 2000);
+      .catch(() => {})
+      .finally(() => setIsSyncingCloud(false));
   };
 
-  // --- LÓGICA CENTRAL DE DISPONIBILIDAD DE DÍAS Y CUPOS ---
+  useEffect(() => {
+    fetchCloudData();
+  }, [activeScriptUrl]);
+
+  const showSavedFeedback = (msg) => {
+    setSavedBanner(msg || (lang === 'EN' ? 'Saved & synced' : 'Guardado y sincronizado'));
+    setTimeout(() => setSavedBanner(''), 2500);
+  };
+
+  const pushConfigToCloud = (overrides = {}) => {
+    const nextConfig = {
+      services: overrides.services ?? services,
+      nailsEnabled: overrides.nailsEnabled ?? nailsEnabled,
+      globalPolicy: overrides.globalPolicy ?? globalPolicy,
+      paymentMethods: overrides.paymentMethods ?? paymentMethods,
+      studioPhone: overrides.studioPhone ?? studioPhone,
+      scheduleOverrides: overrides.scheduleOverrides ?? scheduleOverrides,
+      adminPin: overrides.adminPin ?? adminPin,
+    };
+
+    if (!activeScriptUrl) {
+      showSavedFeedback(lang === 'EN' ? 'Saved on this device' : 'Guardado en este dispositivo');
+      return;
+    }
+
+    setIsSyncingCloud(true);
+    fetch(activeScriptUrl, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'saveConfig',
+        config: nextConfig,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.ok) {
+          showSavedFeedback(
+            lang === 'EN' ? 'Live for all clients ✓' : 'Publicado para todas las clientas ✓'
+          );
+        }
+      })
+      .catch(() => {
+        showSavedFeedback(lang === 'EN' ? 'Saved locally' : 'Guardado localmente');
+      })
+      .finally(() => setIsSyncingCloud(false));
+  };
+
+  const uploadPhotoToGoogleDrive = (file, onDone, setLoadingState) => {
+    if (!file) return;
+    setLoadingState(true);
+    compressImageToBase64(file, ({ dataUrl, pureBase64 }) => {
+      if (!activeScriptUrl) {
+        onDone(dataUrl);
+        setLoadingState(false);
+        return;
+      }
+
+      fetch(activeScriptUrl, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'uploadPhoto',
+          base64: pureBase64,
+          mimeType: 'image/jpeg',
+          fileName: `tina_${Date.now()}.jpg`,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.ok && data.imageUrl) {
+            onDone(data.imageUrl);
+          } else {
+            onDone(dataUrl);
+          }
+        })
+        .catch(() => {
+          onDone(dataUrl);
+        })
+        .finally(() => setLoadingState(false));
+    });
+  };
+
+  // --- DISPONIBILIDAD DE DÍAS Y CUPOS ---
   const isDateAvailableForClients = (dateISO, dayOfWeek) => {
     const override = scheduleOverrides[dateISO];
     if (override?.status === 'closed') return false;
     if (override?.status === 'open') return true;
-    return dayOfWeek === 5 || dayOfWeek === 6; // Viernes y Sábados por defecto
+    return dayOfWeek === 5 || dayOfWeek === 6;
   };
 
   const getSlotsForDate = (dateISO) => {
@@ -630,7 +799,14 @@ export default function App() {
     return bookings.some((b) => b.date === dateISO && b.time === slot);
   };
 
-  // Textos bilingües
+  const copyTextValue = async (key, value) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(''), 2000);
+    } catch {}
+  };
+
   const copy = {
     EN: {
       navServices: 'Services',
@@ -638,7 +814,7 @@ export default function App() {
       heroTag: 'BY VALENTINA ARRAIZ · STUDIO AGENDA',
       heroTitle: 'Refined Lashes, Sculpted Brows & Beauty Rituals.',
       heroSub:
-        'Explore our visual style guide, choose your beauty session, and lock your available appointment via Instagram DM.',
+        'Explore our visual style guide, choose your beauty session, pay your $20 deposit, and send your receipt via Message.',
       heroCta: 'Explore Menu & Book',
       catAll: 'All Services',
       catLashes: 'Lashes',
@@ -654,7 +830,7 @@ export default function App() {
       bookingSubtitle: 'Select any highlighted available date on the calendar to view open time slots.',
       step1: '1. Select Date & Time',
       step2: '2. Client Details',
-      step3: '3. Review & Book via DM',
+      step3: '3. Deposit & Message',
       selectFridaySat: 'Available dates are highlighted in gold:',
       availableSlots: 'Available Time Slots',
       bookedLabel: 'Booked',
@@ -665,13 +841,17 @@ export default function App() {
       backBtn: 'Back',
       selectedServices: 'Selected Services',
       estTotal: 'Estimated Total',
-      depositRequired: '50% Non-Refundable Deposit Due',
-      acceptCheckbox: 'I have read and accept the 50% non-refundable deposit condition.',
-      bookDmBtn: 'Book via Instagram DM',
-      downloadIcsBtn: 'Save Reminder (.ics)',
-      dmHelper:
-        'Clicking "Book via Instagram DM" automatically copies your appointment summary so you can paste it straight into @tinastudioo DM.',
-      copiedSuccess: 'Appointment details copied! Redirecting to @tinastudioo...',
+      depositRequired: 'Non-Refundable Deposit (Due Now)',
+      balanceAtStudio: 'Remaining Balance at Studio',
+      paymentTitle: 'Deposit Payment Methods ($20)',
+      paymentSub: 'Copy a payment method below to send your $20 non-refundable deposit, then tap the Message button to send your receipt:',
+      acceptCheckbox: 'I accept that the $20 booking deposit is non-refundable.',
+      sendMessageBtn: 'Send Receipt via Message',
+      bookIgSecondaryBtn: 'Also Confirm via Instagram DM',
+      downloadIcsBtn: 'Save Calendar Reminder (.ics)',
+      msgHelper:
+        'Opens your Messages app pre-filled with your appointment details so you can attach and send your $20 payment receipt.',
+      bookedBanner: 'Appointment logged! Opening Messages to send your $20 payment receipt...',
       privateProfile: 'Private Profile',
       adminHeader: "Valentina's Private Studio",
       exitAdmin: 'Exit Private Profile',
@@ -684,7 +864,7 @@ export default function App() {
       heroTag: 'BY VALENTINA ARRAIZ · AGENDA DEL ESTUDIO',
       heroTitle: 'Pestañas de Autor, Cejas Esculpidas y Rituales de Belleza.',
       heroSub:
-        'Explora nuestra guía visual de estilos, elige tus servicios y asegura tu cita en los días disponibles vía Instagram DM.',
+        'Explora nuestra guía visual de estilos, elige tus servicios, realiza tu apartado de $20 y envía el comprobante por Mensaje.',
       heroCta: 'Ver Menú y Reservar',
       catAll: 'Todos',
       catLashes: 'Pestañas',
@@ -700,7 +880,7 @@ export default function App() {
       bookingSubtitle: 'Selecciona cualquier fecha resaltada en el calendario para ver los cupos disponibles.',
       step1: '1. Elige Fecha y Hora',
       step2: '2. Tus Datos',
-      step3: '3. Resumen y DM',
+      step3: '3. Pago y Comprobante',
       selectFridaySat: 'Las fechas disponibles están resaltadas en dorado:',
       availableSlots: 'Cupos y Horarios Disponibles',
       bookedLabel: 'Ocupado',
@@ -711,13 +891,17 @@ export default function App() {
       backBtn: 'Volver',
       selectedServices: 'Servicios Seleccionados',
       estTotal: 'Total Estimado',
-      depositRequired: 'Depósito 50% No Reembolsable',
-      acceptCheckbox: 'He leído y acepto la condición del depósito del 50% no reembolsable.',
-      bookDmBtn: 'Reservar por Instagram DM',
+      depositRequired: 'Apartado No Reembolsable (Ahora)',
+      balanceAtStudio: 'Restante a Pagar en el Estudio',
+      paymentTitle: 'Métodos de Pago del Apartado ($20)',
+      paymentSub: 'Copia un método de pago para transferir tus $20 no reembolsables y luego presiona el botón de Mensaje para enviar tu comprobante:',
+      acceptCheckbox: 'Acepto que el apartado de $20 para reservar no es reembolsable.',
+      sendMessageBtn: 'Enviar Comprobante por Mensaje',
+      bookIgSecondaryBtn: 'También Confirmar por Instagram DM',
       downloadIcsBtn: 'Guardar Recordatorio (.ics)',
-      dmHelper:
-        'Al tocar "Reservar por Instagram DM" se copian automáticamente los datos de tu cita para pegarlos directo en el DM de @tinastudioo.',
-      copiedSuccess: '¡Datos copiados! Abriendo @tinastudioo...',
+      msgHelper:
+        'Abre tu app de Mensajes con tus datos ya escritos indicando que agendaste y que adjuntarás tu comprobante de $20.',
+      bookedBanner: '¡Cita registrada! Abriendo Mensajes para enviar tu comprobante de $20...',
       privateProfile: 'Perfil Privado',
       adminHeader: 'Perfil Privado de Valentina',
       exitAdmin: 'Salir del Perfil Privado',
@@ -745,11 +929,14 @@ export default function App() {
     return cartItems.reduce((sum, item) => sum + Number(item.price || 0), 0);
   }, [cartItems]);
 
+  const remainingBalance = useMemo(() => {
+    return Math.max(0, totalAmount - DEPOSIT_AMOUNT);
+  }, [totalAmount]);
+
   const toggleCartItem = (id) => {
     setCartIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   };
 
-  // Calendario público
   const calendarDays = useMemo(() => {
     const year = viewMonth.getFullYear();
     const month = viewMonth.getMonth();
@@ -775,7 +962,6 @@ export default function App() {
     return cells;
   }, [viewMonth, scheduleOverrides]);
 
-  // Calendario del administrador (Valentina)
   const adminCalendarDays = useMemo(() => {
     const year = adminViewMonth.getFullYear();
     const month = adminViewMonth.getMonth();
@@ -789,19 +975,16 @@ export default function App() {
       const dayOfWeek = dateObj.getDay();
       const iso = formatDateISO(year, month, d);
       const isOpen = isDateAvailableForClients(iso, dayOfWeek);
-      const override = scheduleOverrides[iso];
       cells.push({
         day: d,
         iso,
         dayOfWeek,
         isOpen,
-        hasOverride: Boolean(override),
       });
     }
     return cells;
   }, [adminViewMonth, scheduleOverrides]);
 
-  // Descargar recordatorio .ics
   const handleDownloadICS = () => {
     if (!selectedDate || !selectedTime) return;
     const [y, m, d] = selectedDate.split('-').map(Number);
@@ -819,7 +1002,7 @@ export default function App() {
       `DTSTART:${toICSDate(start)}`,
       `DTEND:${toICSDate(end)}`,
       `SUMMARY:TINA STUDIO - ${serviceNames}`,
-      `DESCRIPTION:Appointment with Valentina Arraiz (@tinastudioo). Total: $${totalAmount}. 50% Deposit required via DM.`,
+      `DESCRIPTION:Appointment with Valentina Arraiz (@tinastudioo). Total: $${totalAmount}. $20 Non-Refundable Deposit.`,
       'END:VEVENT',
       'END:VCALENDAR',
     ].join('\r\n');
@@ -833,64 +1016,104 @@ export default function App() {
     URL.revokeObjectURL(url);
   };
 
-  // Acción final: Copiar resumen, guardar y abrir Instagram DM
-  const handleBookViaInstagram = async (e) => {
-    if (!policyAccepted || !selectedDate || !selectedTime || !clientName.trim()) {
-      e.preventDefault();
-      return;
-    }
-
+  // Mensaje prellenado indicando que ya agendó y enviará el comprobante de $20
+  const bookingReceiptMessage = useMemo(() => {
     const serviceSummary = cartItems.map((i) => `${i.name} ($${i.price})`).join(', ');
-    const dmMessage = [
-      `Hi Tina Studio! ✨ I'd love to confirm my booking:`,
+    if (lang === 'ES') {
+      return [
+        `¡Hola Tina Studio! ✨ Ya agendé mi cita en la web y te envío por aquí mi comprobante de pago del apartado de $20 no reembolsable:`,
+        `• Nombre: ${clientName}`,
+        `• Instagram: ${clientIg || 'N/A'}`,
+        `• Servicios: ${serviceSummary}`,
+        `• Fecha y Hora: ${selectedDate} a las ${selectedTime}`,
+        `• Total: $${totalAmount} (Apartado: $20 | Restante en estudio: $${remainingBalance})`,
+        clientNotes ? `• Notas: ${clientNotes}` : null,
+      ]
+        .filter(Boolean)
+        .join('\n');
+    }
+    return [
+      `Hi Tina Studio! ✨ I just booked my appointment on the website and I am sending my $20 non-refundable deposit payment receipt right now:`,
       `• Name: ${clientName}`,
       `• Instagram: ${clientIg || 'N/A'}`,
       `• Services: ${serviceSummary}`,
       `• Date & Time: ${selectedDate} at ${selectedTime}`,
-      `• Total: $${totalAmount} (50% Non-Refundable Deposit: $${(totalAmount / 2).toFixed(2)})`,
+      `• Total: $${totalAmount} ($20 Deposit | Remaining at studio: $${remainingBalance})`,
       clientNotes ? `• Notes: ${clientNotes}` : null,
-      `I agree to the 50% non-refundable deposit policy.`,
     ]
       .filter(Boolean)
       .join('\n');
+  }, [
+    lang,
+    cartItems,
+    clientName,
+    clientIg,
+    selectedDate,
+    selectedTime,
+    totalAmount,
+    remainingBalance,
+    clientNotes,
+  ]);
+
+  const smsHref = useMemo(() => {
+    return buildSmsLink(studioPhone, bookingReceiptMessage);
+  }, [studioPhone, bookingReceiptMessage]);
+
+  const registerBookingRecord = () => {
+    const serviceSummary = cartItems.map((i) => `${i.name} ($${i.price})`).join(', ');
 
     try {
-      await navigator.clipboard.writeText(dmMessage);
-      setCopiedAlert(true);
-      setTimeout(() => setCopiedAlert(false), 4000);
+      navigator.clipboard.writeText(bookingReceiptMessage);
     } catch {}
 
-    const newBooking = {
-      id: Date.now().toString(),
-      clientName,
-      clientIg,
-      services: serviceSummary,
-      date: selectedDate,
-      time: selectedTime,
-      total: totalAmount,
-      notes: clientNotes,
-    };
-    setBookings((prev) => [newBooking, ...prev]);
+    setBookingFeedback(true);
+    setTimeout(() => setBookingFeedback(false), 4500);
 
-    if (scriptUrl) {
-      const [y, m, d] = selectedDate.split('-').map(Number);
-      const { hour, minute } = parseSlotTo24Hour(selectedTime);
-      const startISO = new Date(y, m - 1, d, hour, minute).toISOString();
+    const alreadyLogged = bookings.some(
+      (b) => b.date === selectedDate && b.time === selectedTime && b.clientName === clientName
+    );
+    if (!alreadyLogged) {
+      const newBooking = {
+        id: Date.now().toString(),
+        clientName,
+        clientIg,
+        services: serviceSummary,
+        date: selectedDate,
+        time: selectedTime,
+        total: totalAmount,
+        notes: clientNotes,
+      };
+      setBookings((prev) => [newBooking, ...prev]);
 
-      fetch(scriptUrl, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          clientName,
-          contact: clientIg,
-          service: serviceSummary,
-          total: totalAmount,
-          notes: clientNotes,
-          startISO,
-        }),
-      }).catch(() => {});
+      if (activeScriptUrl) {
+        const [y, m, d] = selectedDate.split('-').map(Number);
+        const { hour, minute } = parseSlotTo24Hour(selectedTime);
+        const startISO = new Date(y, m - 1, d, hour, minute).toISOString();
+
+        fetch(activeScriptUrl, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'createBooking',
+            clientName,
+            contact: clientIg,
+            service: serviceSummary,
+            date: selectedDate,
+            time: selectedTime,
+            total: totalAmount,
+            notes: clientNotes,
+            startISO,
+          }),
+        }).catch(() => {});
+      }
     }
+  };
+
+  const handleConfirmAction = (e) => {
+    if (!policyAccepted || !selectedDate || !selectedTime || !clientName.trim()) {
+      e.preventDefault();
+      return;
+    }
+    registerBookingRecord();
   };
 
   // --- FUNCIONES DEL PERFIL PRIVADO ---
@@ -910,7 +1133,7 @@ export default function App() {
         setTimeout(() => {
           setPinError(false);
           setPinEntry('');
-        }, 500);
+        }, 550);
       }
     }
   };
@@ -919,7 +1142,6 @@ export default function App() {
     e.preventDefault();
     if (!newSrvName.trim() || !newSrvPrice) return;
     const priceNum = Number(newSrvPrice) || 0;
-    const half = (priceNum / 2).toFixed(priceNum % 2 === 0 ? 0 : 2);
 
     const created = {
       id: `srv-${Date.now()}`,
@@ -929,121 +1151,129 @@ export default function App() {
       duration: newSrvDuration.trim() || '2h 30m',
       descEN: newSrvDescEN.trim() || 'Specialized beauty service by Valentina Arraiz.',
       descES: newSrvDescES.trim() || 'Servicio especializado realizado por Valentina Arraiz.',
-      policyEN: `A 50% non-refundable deposit ($${half}) is required via Instagram DM to lock your date.`,
-      policyES: `Se requiere un depósito del 50% no reembolsable ($${half}) vía Instagram DM para reservar tu cupo.`,
+      policyEN: 'A $20 non-refundable deposit is required to lock your appointment date.',
+      policyES: 'Se requiere un apartado de $20 no reembolsable para asegurar tu fecha.',
       image: newSrvImage,
     };
 
-    setServices((prev) => [created, ...prev]);
+    const nextServices = [created, ...services];
+    setServices(nextServices);
     setNewSrvName('');
     setNewSrvPrice('');
     setNewSrvDuration('2h 30m');
     setNewSrvDescEN('');
     setNewSrvDescES('');
     setNewSrvImage('');
-    showSavedFeedback();
+    pushConfigToCloud({ services: nextServices });
   };
 
   const handleDeleteService = (id) => {
-    setServices((prev) => prev.filter((s) => s.id !== id));
+    const nextServices = services.filter((s) => s.id !== id);
+    setServices(nextServices);
     setCartIds((prev) => prev.filter((cid) => cid !== id));
-    showSavedFeedback();
+    pushConfigToCloud({ services: nextServices });
   };
 
   const handleUpdatePrice = (id, value) => {
-    setServices((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, price: Number(value) || 0 } : s))
+    const nextServices = services.map((s) =>
+      s.id === id ? { ...s, price: Number(value) || 0 } : s
     );
-    showSavedFeedback();
+    setServices(nextServices);
   };
 
   const handleUpdateServicePolicy = (id, field, value) => {
-    setServices((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, [field]: value } : s))
+    const nextServices = services.map((s) =>
+      s.id === id ? { ...s, [field]: value } : s
     );
-    showSavedFeedback();
+    setServices(nextServices);
   };
 
-  // Controles de días y cupos en el Perfil Privado
+  const handleAddPaymentMethod = (e) => {
+    e.preventDefault();
+    if (!newPayLabel.trim() || !newPayValue.trim()) return;
+    const nextPayments = [
+      ...paymentMethods,
+      { id: `pm-${Date.now()}`, label: newPayLabel.trim(), value: newPayValue.trim() },
+    ];
+    setPaymentMethods(nextPayments);
+    setNewPayLabel('');
+    setNewPayValue('');
+    pushConfigToCloud({ paymentMethods: nextPayments });
+  };
+
+  const handleDeletePaymentMethod = (id) => {
+    const nextPayments = paymentMethods.filter((pm) => pm.id !== id);
+    setPaymentMethods(nextPayments);
+    pushConfigToCloud({ paymentMethods: nextPayments });
+  };
+
   const setDayStatus = (dateISO, status) => {
-    setScheduleOverrides((prev) => {
-      const current = prev[dateISO] || { extraSlots: [], blockedSlots: [] };
-      return {
-        ...prev,
-        [dateISO]: {
-          ...current,
-          status,
-        },
-      };
-    });
-    showSavedFeedback();
+    const current = scheduleOverrides[dateISO] || { extraSlots: [], blockedSlots: [] };
+    const nextOverrides = {
+      ...scheduleOverrides,
+      [dateISO]: { ...current, status },
+    };
+    setScheduleOverrides(nextOverrides);
+    pushConfigToCloud({ scheduleOverrides: nextOverrides });
   };
 
   const toggleSlotBlockOnAdminDate = (dateISO, slot) => {
-    setScheduleOverrides((prev) => {
-      const current = prev[dateISO] || { extraSlots: [], blockedSlots: [] };
-      const blocked = current.blockedSlots || [];
-      const nextBlocked = blocked.includes(slot)
-        ? blocked.filter((s) => s !== slot)
-        : [...blocked, slot];
-      return {
-        ...prev,
-        [dateISO]: {
-          ...current,
-          blockedSlots: nextBlocked,
-        },
-      };
-    });
-    showSavedFeedback();
+    const current = scheduleOverrides[dateISO] || { extraSlots: [], blockedSlots: [] };
+    const blocked = current.blockedSlots || [];
+    const nextBlocked = blocked.includes(slot)
+      ? blocked.filter((s) => s !== slot)
+      : [...blocked, slot];
+    const nextOverrides = {
+      ...scheduleOverrides,
+      [dateISO]: { ...current, blockedSlots: nextBlocked },
+    };
+    setScheduleOverrides(nextOverrides);
+    pushConfigToCloud({ scheduleOverrides: nextOverrides });
   };
 
   const addCustomSlotToDate = (dateISO, slotLabel) => {
     if (!slotLabel) return;
-    setScheduleOverrides((prev) => {
-      const current = prev[dateISO] || { extraSlots: [], blockedSlots: [] };
-      const existingExtra = current.extraSlots || [];
-      if (BASE_TIME_SLOTS.includes(slotLabel) || existingExtra.includes(slotLabel)) {
-        return prev;
-      }
-      // Al agregar un cupo en un día cerrado, lo abrimos automáticamente
-      const [y, m, d] = dateISO.split('-').map(Number);
-      const dow = new Date(y, m - 1, d).getDay();
-      const nextStatus =
-        current.status === 'closed'
-          ? 'open'
-          : dow !== 5 && dow !== 6
-          ? 'open'
-          : current.status;
+    const current = scheduleOverrides[dateISO] || { extraSlots: [], blockedSlots: [] };
+    const existingExtra = current.extraSlots || [];
+    if (BASE_TIME_SLOTS.includes(slotLabel) || existingExtra.includes(slotLabel)) return;
 
-      return {
-        ...prev,
-        [dateISO]: {
-          ...current,
-          status: nextStatus,
-          extraSlots: [...existingExtra, slotLabel],
-        },
-      };
-    });
-    showSavedFeedback();
+    const [y, m, d] = dateISO.split('-').map(Number);
+    const dow = new Date(y, m - 1, d).getDay();
+    const nextStatus =
+      current.status === 'closed'
+        ? 'open'
+        : dow !== 5 && dow !== 6
+        ? 'open'
+        : current.status;
+
+    const nextOverrides = {
+      ...scheduleOverrides,
+      [dateISO]: {
+        ...current,
+        status: nextStatus,
+        extraSlots: [...existingExtra, slotLabel],
+      },
+    };
+    setScheduleOverrides(nextOverrides);
+    pushConfigToCloud({ scheduleOverrides: nextOverrides });
   };
 
   const removeCustomSlotFromDate = (dateISO, slotLabel) => {
-    setScheduleOverrides((prev) => {
-      const current = prev[dateISO] || { extraSlots: [], blockedSlots: [] };
-      return {
-        ...prev,
-        [dateISO]: {
-          ...current,
-          extraSlots: (current.extraSlots || []).filter((s) => s !== slotLabel),
-          blockedSlots: (current.blockedSlots || []).filter((s) => s !== slotLabel),
-        },
-      };
-    });
-    showSavedFeedback();
+    const current = scheduleOverrides[dateISO] || { extraSlots: [], blockedSlots: [] };
+    const nextOverrides = {
+      ...scheduleOverrides,
+      [dateISO]: {
+        ...current,
+        extraSlots: (current.extraSlots || []).filter((s) => s !== slotLabel),
+        blockedSlots: (current.blockedSlots || []).filter((s) => s !== slotLabel),
+      },
+    };
+    setScheduleOverrides(nextOverrides);
+    pushConfigToCloud({ scheduleOverrides: nextOverrides });
   };
 
   // =========================================================================
-  // VISTA 1: PERFIL PRIVADO DE VALENTINA (PROTEGIDO CON PIN)
+  // VISTA 1: PERFIL PRIVADO DE VALENTINA
   // =========================================================================
   if (isAdmin) {
     const [ay, am, ad] = adminSelectedDate.split('-').map(Number);
@@ -1059,7 +1289,6 @@ export default function App() {
 
     return (
       <div className="min-h-screen bg-[#F7F4EF] text-[#222120] font-sans pb-20">
-        {/* Barra Superior Privada */}
         <header className="sticky top-0 z-30 bg-[#222120] text-white px-4 sm:px-8 py-4 shadow-md">
           <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
@@ -1067,12 +1296,32 @@ export default function App() {
               <div>
                 <h1 className="font-serif text-xl sm:text-2xl tracking-wide">{t.adminHeader}</h1>
                 <p className="text-[11px] uppercase tracking-widest text-gray-300">
-                  TINA STUDIO • Control Panel
+                  {activeScriptUrl
+                    ? lang === 'EN'
+                      ? '● Cloud Sync Active (All devices)'
+                      : '● Nube Activa (Visible en todos los teléfonos)'
+                    : lang === 'EN'
+                    ? '○ Local Mode (Connect Google Script in Tab 4)'
+                    : '○ Modo Local (Conecta Google Script en Pestaña 4)'}
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
+              {activeScriptUrl && (
+                <button
+                  onClick={() => pushConfigToCloud()}
+                  disabled={isSyncingCloud}
+                  className="px-3.5 py-2 text-xs font-semibold uppercase tracking-widest bg-emerald-800 text-white hover:bg-emerald-700 flex items-center gap-1.5"
+                >
+                  {isSyncingCloud ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <RefreshCw size={14} />
+                  )}
+                  {lang === 'EN' ? 'Publish Changes' : 'Publicar Cambios'}
+                </button>
+              )}
               <button
                 onClick={() => setLang(lang === 'EN' ? 'ES' : 'EN')}
                 className="px-3 py-2 text-xs font-semibold uppercase tracking-widest border border-white/25 hover:border-[#C5A059]"
@@ -1092,17 +1341,16 @@ export default function App() {
         {savedBanner && (
           <div className="fixed bottom-6 right-6 z-50 bg-[#222120] text-white border border-[#C5A059] px-5 py-3 shadow-xl text-xs uppercase tracking-widest flex items-center gap-2">
             <Check size={16} className="text-[#C5A059]" />
-            {lang === 'EN' ? 'Changes saved' : 'Cambios guardados'}
+            {savedBanner}
           </div>
         )}
 
         <main className="max-w-5xl mx-auto px-4 sm:px-8 pt-6 space-y-6">
-          {/* Pestañas del Perfil Privado */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {[
               { id: 'catalog', labelEN: 'Services & Photos', labelES: 'Servicios y Fotos' },
               { id: 'agenda', labelEN: 'Days & Slots', labelES: 'Días y Cupos' },
-              { id: 'policies', labelEN: '50% Conditions', labelES: 'Condiciones 50%' },
+              { id: 'policies', labelEN: 'Payments & $20', labelES: 'Pagos y $20' },
               { id: 'security', labelEN: 'Google & PIN', labelES: 'Google y PIN' },
             ].map((tab) => (
               <button
@@ -1119,12 +1367,9 @@ export default function App() {
             ))}
           </div>
 
-          {/* =============================================================== */}
-          {/* TAB 1: AGREGAR SERVICIOS, EDITAR PRECIOS Y SUBIR FOTOS          */}
-          {/* =============================================================== */}
+          {/* TAB 1: AGREGAR SERVICIOS, EDITAR PRECIOS Y SUBIR FOTOS */}
           {adminTab === 'catalog' && (
             <div className="space-y-6">
-              {/* Formulario completo para agregar nuevo servicio */}
               <form
                 onSubmit={handleCreateService}
                 className="bg-white border border-[#DDD6CC] p-5 sm:p-6 space-y-4"
@@ -1135,8 +1380,8 @@ export default function App() {
                   </h2>
                   <p className="text-xs text-gray-500">
                     {lang === 'EN'
-                      ? 'Create a new treatment with price, duration, description, and optional photo.'
-                      : 'Crea un servicio nuevo con precio, duración, descripción y fotografía opcional.'}
+                      ? 'Create a new treatment with price, duration, description, and photo.'
+                      : 'Crea un servicio nuevo con precio, duración, descripción y fotografía.'}
                   </p>
                 </div>
 
@@ -1232,11 +1477,19 @@ export default function App() {
                 <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
                   <div className="flex items-center gap-3">
                     <label className="cursor-pointer px-4 py-2.5 bg-[#F7F4EF] border border-[#DDD6CC] hover:border-[#222120] text-xs uppercase tracking-widest font-semibold flex items-center gap-2">
-                      <Camera size={15} />
+                      {isUploadingNewSrvImg ? (
+                        <Loader2 size={15} className="animate-spin" />
+                      ) : (
+                        <Camera size={15} />
+                      )}
                       <span>
-                        {newSrvImage
+                        {isUploadingNewSrvImg
                           ? lang === 'EN'
-                            ? 'Photo Selected ✓'
+                            ? 'Uploading...'
+                            : 'Subiendo...'
+                          : newSrvImage
+                          ? lang === 'EN'
+                            ? 'Photo Ready ✓'
                             : 'Foto Lista ✓'
                           : lang === 'EN'
                           ? 'Attach Photo (Optional)'
@@ -1247,7 +1500,11 @@ export default function App() {
                         accept="image/*"
                         className="hidden"
                         onChange={(e) =>
-                          compressImageFile(e.target.files?.[0], (b64) => setNewSrvImage(b64))
+                          uploadPhotoToGoogleDrive(
+                            e.target.files?.[0],
+                            (url) => setNewSrvImage(url),
+                            setIsUploadingNewSrvImg
+                          )
                         }
                       />
                     </label>
@@ -1262,14 +1519,14 @@ export default function App() {
 
                   <button
                     type="submit"
-                    className="px-6 py-3 bg-[#222120] text-white text-xs uppercase tracking-widest font-semibold flex items-center gap-2 hover:bg-black"
+                    disabled={isUploadingNewSrvImg}
+                    className="px-6 py-3 bg-[#222120] text-white text-xs uppercase tracking-widest font-semibold flex items-center gap-2 hover:bg-black disabled:opacity-50"
                   >
                     <Plus size={15} /> {lang === 'EN' ? 'Publish Service' : 'Publicar Servicio'}
                   </button>
                 </div>
               </form>
 
-              {/* Interruptor categoría Uñas */}
               <div className="bg-white border border-[#DDD6CC] p-5 flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <h2 className="font-serif text-xl">
@@ -1283,8 +1540,9 @@ export default function App() {
                 </div>
                 <button
                   onClick={() => {
-                    setNailsEnabled(!nailsEnabled);
-                    showSavedFeedback();
+                    const nextVal = !nailsEnabled;
+                    setNailsEnabled(nextVal);
+                    pushConfigToCloud({ nailsEnabled: nextVal });
                   }}
                   className={`px-5 py-2.5 text-xs uppercase tracking-widest font-semibold transition-colors ${
                     nailsEnabled
@@ -1302,7 +1560,6 @@ export default function App() {
                 </button>
               </div>
 
-              {/* Listado completo para editar precios, subir fotos o eliminar */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {services.map((srv) => (
                   <div
@@ -1319,10 +1576,11 @@ export default function App() {
                           />
                           <button
                             onClick={() => {
-                              setServices((prev) =>
-                                prev.map((s) => (s.id === srv.id ? { ...s, image: '' } : s))
+                              const nextServices = services.map((s) =>
+                                s.id === srv.id ? { ...s, image: '' } : s
                               );
-                              showSavedFeedback();
+                              setServices(nextServices);
+                              pushConfigToCloud({ services: nextServices });
                             }}
                             title="Remove photo"
                             className="absolute -top-2 -right-2 bg-red-700 text-white rounded-full p-1"
@@ -1347,6 +1605,7 @@ export default function App() {
                             type="number"
                             value={srv.price}
                             onChange={(e) => handleUpdatePrice(srv.id, e.target.value)}
+                            onBlur={() => pushConfigToCloud()}
                             className="w-20 px-2 py-1 border border-[#DDD6CC] bg-[#F7F4EF] text-sm font-semibold"
                           />
                         </div>
@@ -1355,21 +1614,38 @@ export default function App() {
 
                     <div className="flex items-center gap-1.5 shrink-0">
                       <label className="cursor-pointer px-3 py-2.5 bg-[#222120] text-white text-xs uppercase tracking-wider font-semibold flex items-center gap-1.5 hover:bg-black">
-                        <Camera size={14} />
+                        {uploadingPhotoId === srv.id ? (
+                          <Loader2 size={14} className="animate-spin" />
+                        ) : (
+                          <Camera size={14} />
+                        )}
                         <span>
-                          {srv.image ? (lang === 'EN' ? 'Change' : 'Cambiar') : lang === 'EN' ? 'Photo' : 'Foto'}
+                          {uploadingPhotoId === srv.id
+                            ? '...'
+                            : srv.image
+                            ? lang === 'EN'
+                              ? 'Change'
+                              : 'Cambiar'
+                            : lang === 'EN'
+                            ? 'Photo'
+                            : 'Foto'}
                         </span>
                         <input
                           type="file"
                           accept="image/*"
                           className="hidden"
                           onChange={(e) =>
-                            compressImageFile(e.target.files?.[0], (b64) => {
-                              setServices((prev) =>
-                                prev.map((s) => (s.id === srv.id ? { ...s, image: b64 } : s))
-                              );
-                              showSavedFeedback();
-                            })
+                            uploadPhotoToGoogleDrive(
+                              e.target.files?.[0],
+                              (url) => {
+                                const nextServices = services.map((s) =>
+                                  s.id === srv.id ? { ...s, image: url } : s
+                                );
+                                setServices(nextServices);
+                                pushConfigToCloud({ services: nextServices });
+                              },
+                              (loading) => setUploadingPhotoId(loading ? srv.id : null)
+                            )
                           }
                         />
                       </label>
@@ -1387,13 +1663,10 @@ export default function App() {
             </div>
           )}
 
-          {/* =============================================================== */}
-          {/* TAB 2: ABRIR DÍAS, AGREGAR CUPOS Y MARCAR DÍAS NO DISPONIBLES   */}
-          {/* =============================================================== */}
+          {/* TAB 2: ABRIR DÍAS, AGREGAR CUPOS Y MARCAR DÍAS NO DISPONIBLES */}
           {adminTab === 'agenda' && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                {/* Calendario Interactivo de Control */}
                 <div className="lg:col-span-6 bg-white border border-[#DDD6CC] p-5 space-y-4">
                   <div>
                     <h2 className="font-serif text-2xl">
@@ -1465,20 +1738,8 @@ export default function App() {
                       })}
                     </div>
                   </div>
-
-                  <div className="flex flex-wrap items-center gap-4 text-[11px] text-gray-600">
-                    <span className="flex items-center gap-1.5">
-                      <span className="w-3 h-3 inline-block bg-white border border-[#C5A059]" />
-                      {lang === 'EN' ? 'Open Day' : 'Día Disponible'}
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <span className="w-3 h-3 inline-block bg-[#EDEAE4]" />
-                      {lang === 'EN' ? 'Unavailable / Closed' : 'No Disponible / Cerrado'}
-                    </span>
-                  </div>
                 </div>
 
-                {/* Panel de edición del día seleccionado */}
                 <div className="lg:col-span-6 bg-white border border-[#DDD6CC] p-5 space-y-5">
                   <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#DDD6CC] pb-3">
                     <div>
@@ -1505,7 +1766,6 @@ export default function App() {
                     </span>
                   </div>
 
-                  {/* Botones para abrir el día o marcarlo como no disponible */}
                   <div className="grid grid-cols-2 gap-2.5">
                     <button
                       onClick={() => setDayStatus(adminSelectedDate, 'open')}
@@ -1532,7 +1792,6 @@ export default function App() {
                     </button>
                   </div>
 
-                  {/* Cupos / Horarios de esa fecha */}
                   <div className="space-y-3">
                     <p className="text-xs uppercase tracking-widest text-gray-600 font-semibold">
                       {lang === 'EN'
@@ -1574,7 +1833,6 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Agregar cupo / horario extra a esa fecha */}
                   <div className="pt-3 border-t border-[#DDD6CC] space-y-2.5">
                     <label className="block text-xs uppercase tracking-widest text-gray-600 font-semibold">
                       {lang === 'EN'
@@ -1614,62 +1872,122 @@ export default function App() {
                   </div>
                 </div>
               </div>
-
-              {/* Solicitudes recientes recibidas */}
-              <div className="bg-white border border-[#DDD6CC] p-5 space-y-3">
-                <h3 className="font-serif text-xl">
-                  {lang === 'EN' ? 'Logged DM Booking Requests' : 'Reservas Iniciadas hacia DM'}
-                </h3>
-                {bookings.length === 0 ? (
-                  <p className="text-xs text-gray-500 italic">
-                    {lang === 'EN'
-                      ? 'No appointments logged on this device yet.'
-                      : 'Aún no hay reservas registradas en este dispositivo.'}
-                  </p>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {bookings.map((b) => (
-                      <div
-                        key={b.id}
-                        className="p-3.5 bg-[#F7F4EF] border border-[#DDD6CC] text-xs space-y-1"
-                      >
-                        <div className="flex justify-between font-bold text-sm">
-                          <span>{b.clientName}</span>
-                          <span className="text-[#C5A059]">${b.total}</span>
-                        </div>
-                        <p>
-                          <strong>{b.date}</strong> · {b.time}
-                        </p>
-                        <p className="text-gray-600">{b.services}</p>
-                        <div className="flex justify-between items-center pt-2">
-                          <span className="text-gray-500">{b.clientIg}</span>
-                          <button
-                            onClick={() =>
-                              setBookings((prev) => prev.filter((item) => item.id !== b.id))
-                            }
-                            className="text-red-700 flex items-center gap-1 hover:underline"
-                          >
-                            <Trash2 size={12} /> {lang === 'EN' ? 'Remove' : 'Eliminar'}
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
             </div>
           )}
 
-          {/* =============================================================== */}
-          {/* TAB 3: CONDICIONES Y DEPÓSITO 50% NO REEMBOLSABLE               */}
-          {/* =============================================================== */}
+          {/* TAB 3: MÉTODOS DE PAGO, TELÉFONO DE MENSAJES Y POLÍTICA DE $20 */}
           {adminTab === 'policies' && (
             <div className="space-y-6">
+              {/* Configurar Métodos de Pago y Número de Teléfono para Messages */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white border border-[#DDD6CC] p-6 space-y-4">
+                  <h2 className="font-serif text-xl flex items-center gap-2">
+                    <CreditCard size={18} className="text-[#C5A059]" />
+                    {lang === 'EN'
+                      ? 'Embedded Payment Methods ($20 Deposit)'
+                      : 'Métodos de Pago Incrustados ($20)'}
+                  </h2>
+                  <p className="text-xs text-gray-500">
+                    {lang === 'EN'
+                      ? 'Clients will see these payment accounts at checkout to pay the $20 non-refundable deposit.'
+                      : 'Las clientas verán estas cuentas al finalizar la reserva para transferir los $20 de apartado.'}
+                  </p>
+
+                  <div className="space-y-2.5">
+                    {paymentMethods.map((pm) => (
+                      <div
+                        key={pm.id}
+                        className="p-3 bg-[#F7F4EF] border border-[#DDD6CC] flex items-center justify-between gap-2"
+                      >
+                        <div className="min-w-0">
+                          <span className="text-[10px] uppercase tracking-widest text-[#C5A059] font-bold block">
+                            {pm.label}
+                          </span>
+                          <span className="text-sm font-medium break-all">{pm.value}</span>
+                        </div>
+                        <button
+                          onClick={() => handleDeletePaymentMethod(pm.id)}
+                          className="p-1.5 text-gray-400 hover:text-red-700 shrink-0"
+                          title="Delete"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <form onSubmit={handleAddPaymentMethod} className="space-y-2 pt-2 border-t border-[#DDD6CC]">
+                    <input
+                      type="text"
+                      value={newPayLabel}
+                      onChange={(e) => setNewPayLabel(e.target.value)}
+                      placeholder={
+                        lang === 'EN'
+                          ? 'Method name (e.g. Zelle, CashApp, PayPal)'
+                          : 'Nombre (ej. Zelle, CashApp, Pago Móvil)'
+                      }
+                      className="w-full p-2.5 border border-[#DDD6CC] bg-[#F7F4EF] text-xs"
+                    />
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={newPayValue}
+                        onChange={(e) => setNewPayValue(e.target.value)}
+                        placeholder={
+                          lang === 'EN'
+                            ? 'Account / Email / Phone / $Tag'
+                            : 'Cuenta / Correo / Teléfono / $Usuario'
+                        }
+                        className="flex-1 p-2.5 border border-[#DDD6CC] bg-[#F7F4EF] text-xs"
+                      />
+                      <button
+                        type="submit"
+                        className="px-4 py-2.5 bg-[#222120] text-white text-xs uppercase tracking-widest font-semibold"
+                      >
+                        {lang === 'EN' ? 'Add' : 'Agregar'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
+                {/* Número de teléfono para el acceso directo a Messages (SMS) */}
+                <div className="bg-white border border-[#DDD6CC] p-6 space-y-4">
+                  <h2 className="font-serif text-xl flex items-center gap-2">
+                    <Phone size={18} className="text-[#C5A059]" />
+                    {lang === 'EN'
+                      ? 'Direct Message (SMS) Phone Number'
+                      : 'Teléfono para Recibir Comprobantes (SMS)'}
+                  </h2>
+                  <p className="text-xs text-gray-500">
+                    {lang === 'EN'
+                      ? 'When a client taps "Send Receipt via Message", their Messages app will open straight to this phone number with their booking summary.'
+                      : 'Al tocar "Enviar Comprobante por Mensaje", se abrirá la app de Mensajes directo hacia este número con el texto ya escrito.'}
+                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      type="tel"
+                      value={studioPhone}
+                      onChange={(e) => setStudioPhone(e.target.value)}
+                      placeholder="+1 305 555 0199"
+                      className="flex-1 p-3 border border-[#DDD6CC] bg-[#F7F4EF] text-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => pushConfigToCloud({ studioPhone })}
+                      className="px-5 py-3 bg-[#222120] text-white text-xs uppercase tracking-widest font-semibold"
+                    >
+                      {lang === 'EN' ? 'Save' : 'Guardar'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Condición General del Apartado de $20 */}
               <div className="bg-white border border-[#DDD6CC] p-6 space-y-4">
                 <h2 className="font-serif text-2xl">
                   {lang === 'EN'
-                    ? 'Global Booking Condition (50% Non-Refundable Deposit)'
-                    : 'Condición General de Reserva (Depósito 50% No Reembolsable)'}
+                    ? 'Global Booking Condition ($20 Non-Refundable Deposit)'
+                    : 'Condición General de Reserva (Apartado $20 No Reembolsable)'}
                 </h2>
                 <div>
                   <label className="block text-xs uppercase tracking-widest text-gray-500 mb-1">
@@ -1678,10 +1996,8 @@ export default function App() {
                   <textarea
                     rows={2}
                     value={globalPolicy.EN}
-                    onChange={(e) => {
-                      setGlobalPolicy({ ...globalPolicy, EN: e.target.value });
-                      showSavedFeedback();
-                    }}
+                    onChange={(e) => setGlobalPolicy({ ...globalPolicy, EN: e.target.value })}
+                    onBlur={() => pushConfigToCloud()}
                     className="w-full p-3 border border-[#DDD6CC] bg-[#F7F4EF] text-sm"
                   />
                 </div>
@@ -1692,23 +2008,20 @@ export default function App() {
                   <textarea
                     rows={2}
                     value={globalPolicy.ES}
-                    onChange={(e) => {
-                      setGlobalPolicy({ ...globalPolicy, ES: e.target.value });
-                      showSavedFeedback();
-                    }}
+                    onChange={(e) => setGlobalPolicy({ ...globalPolicy, ES: e.target.value })}
+                    onBlur={() => pushConfigToCloud()}
                     className="w-full p-3 border border-[#DDD6CC] bg-[#F7F4EF] text-sm"
                   />
                 </div>
                 <button
                   onClick={() => {
-                    setServices((prev) =>
-                      prev.map((s) => ({
-                        ...s,
-                        policyEN: globalPolicy.EN,
-                        policyES: globalPolicy.ES,
-                      }))
-                    );
-                    showSavedFeedback();
+                    const nextServices = services.map((s) => ({
+                      ...s,
+                      policyEN: globalPolicy.EN,
+                      policyES: globalPolicy.ES,
+                    }));
+                    setServices(nextServices);
+                    pushConfigToCloud({ services: nextServices });
                   }}
                   className="px-5 py-2.5 bg-[#222120] text-white text-xs uppercase tracking-widest font-semibold"
                 >
@@ -1717,58 +2030,27 @@ export default function App() {
                     : 'Aplicar Condición a Todos los Servicios'}
                 </button>
               </div>
-
-              <div className="bg-white border border-[#DDD6CC] p-6 space-y-4">
-                <h3 className="font-serif text-xl">
-                  {lang === 'EN' ? 'Condition per Individual Service' : 'Condición por Servicio Individual'}
-                </h3>
-                {services.map((srv) => (
-                  <div key={srv.id} className="p-4 bg-[#F7F4EF] border border-[#DDD6CC] space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="font-semibold text-sm">
-                        {srv.name} (${srv.price})
-                      </span>
-                      <span className="text-[11px] uppercase tracking-widest text-[#C5A059]">
-                        {srv.category}
-                      </span>
-                    </div>
-                    <input
-                      type="text"
-                      value={lang === 'EN' ? srv.policyEN : srv.policyES}
-                      onChange={(e) =>
-                        handleUpdateServicePolicy(
-                          srv.id,
-                          lang === 'EN' ? 'policyEN' : 'policyES',
-                          e.target.value
-                        )
-                      }
-                      className="w-full p-2.5 bg-white border border-[#DDD6CC] text-xs"
-                    />
-                  </div>
-                ))}
-              </div>
             </div>
           )}
 
-          {/* =============================================================== */}
-          {/* TAB 4: GOOGLE CALENDAR SYNC & CAMBIO DE PIN                     */}
-          {/* =============================================================== */}
+          {/* TAB 4: GOOGLE SYNC & CAMBIO DE PIN */}
           {adminTab === 'security' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-white border border-[#DDD6CC] p-6 space-y-4">
-                <h2 className="font-serif text-xl">Google Calendar Sync (Apps Script)</h2>
+                <h2 className="font-serif text-xl">Google Cloud Sync (Drive, Sheets & Calendar)</h2>
                 <p className="text-xs text-gray-600">
                   {lang === 'EN'
-                    ? 'Paste your Google Apps Script Web App URL (/exec) to sync appointments and phone alarms automatically.'
-                    : 'Pega aquí la URL /exec de tu Google Apps Script para sincronizar citas y recordatorios en tu teléfono.'}
+                    ? 'Connected Web App URL (/exec). Changes made here sync automatically to all client devices.'
+                    : 'URL /exec conectada. Todos los cambios realizados aquí se sincronizan en todos los teléfonos.'}
                 </p>
                 <input
                   type="text"
-                  value={scriptUrl}
+                  value={activeScriptUrl}
                   onChange={(e) => {
-                    setScriptUrl(e.target.value);
-                    localStorage.setItem('tina_studio_script_v4', e.target.value);
-                    showSavedFeedback();
+                    setCustomScriptUrl(e.target.value);
+                    try {
+                      localStorage.setItem('tina_studio_script_v6', e.target.value);
+                    } catch {}
                   }}
                   placeholder="https://script.google.com/macros/s/.../exec"
                   className="w-full p-3 border border-[#DDD6CC] bg-[#F7F4EF] text-xs font-mono"
@@ -1781,8 +2063,8 @@ export default function App() {
                 </h2>
                 <p className="text-xs text-gray-600">
                   {lang === 'EN'
-                    ? 'Your 4-digit PIN protects prices, photos, days, and conditions from public edits.'
-                    : 'Tu PIN de 4 dígitos protege precios, fotos, días y condiciones contra cambios no autorizados.'}
+                    ? 'Current PIN is synced across devices. Update it to any 4 digits.'
+                    : 'El PIN actual está sincronizado en todos los dispositivos. Cámbialo a 4 dígitos.'}
                 </p>
                 <div className="flex gap-2">
                   <input
@@ -1790,16 +2072,15 @@ export default function App() {
                     maxLength={4}
                     value={newPinInput}
                     onChange={(e) => setNewPinInput(e.target.value.replace(/\D/g, ''))}
-                    placeholder="4 digits (e.g. 2026)"
+                    placeholder="4 digits (e.g. 2004)"
                     className="flex-1 p-3 border border-[#DDD6CC] bg-[#F7F4EF] text-center tracking-[0.5em] font-mono"
                   />
                   <button
                     onClick={() => {
                       if (newPinInput.length === 4) {
                         setAdminPin(newPinInput);
-                        localStorage.setItem('tina_studio_pin_v4', newPinInput);
+                        pushConfigToCloud({ adminPin: newPinInput });
                         setNewPinInput('');
-                        showSavedFeedback();
                       }
                     }}
                     className="px-5 py-3 bg-[#222120] text-white text-xs uppercase tracking-widest font-semibold"
@@ -1816,7 +2097,7 @@ export default function App() {
   }
 
   // =========================================================================
-  // VISTA 2: WEB PÚBLICA EDITORIAL DE TINA STUDIO (RESPONSIVE WEB + MÓVIL)
+  // VISTA 2: WEB PÚBLICA EDITORIAL DE TINA STUDIO
   // =========================================================================
   const monthLabel = viewMonth.toLocaleDateString(lang === 'EN' ? 'en-US' : 'es-ES', {
     month: 'long',
@@ -1832,7 +2113,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#F7F4EF] text-[#222120] font-sans pb-24 sm:pb-12">
-      {/* HEADER EDITORIAL */}
       <header className="sticky top-0 z-30 bg-[#F7F4EF]/95 backdrop-blur-sm border-b border-[#DDD6CC]">
         <div className="max-w-6xl mx-auto px-4 sm:px-8 py-3.5 grid grid-cols-3 items-center">
           <nav className="flex items-center gap-4 sm:gap-6 text-xs uppercase tracking-widest font-semibold">
@@ -1869,7 +2149,6 @@ export default function App() {
         </div>
       </header>
 
-      {/* HERO EDITORIAL */}
       <section className="border-b border-[#DDD6CC] bg-gradient-to-b from-[#EDEAE4] to-[#F7F4EF] px-4 sm:px-8 py-12 sm:py-16">
         <div className="max-w-3xl mx-auto text-center space-y-5">
           <span className="inline-block px-4 py-1.5 bg-white border border-[#DDD6CC] text-[11px] uppercase tracking-[0.22em] text-[#C5A059] font-semibold">
@@ -1900,7 +2179,6 @@ export default function App() {
         </div>
       </section>
 
-      {/* SECCIÓN 1: CATÁLOGO DE SERVICIOS Y GUÍA VISUAL */}
       <section id="services" className="max-w-6xl mx-auto px-4 sm:px-8 py-12 sm:py-16">
         <div className="flex items-center justify-start sm:justify-center gap-2 overflow-x-auto pb-4 mb-8">
           {[
@@ -2024,7 +2302,6 @@ export default function App() {
         </div>
       </section>
 
-      {/* SECCIÓN 2: AGENDA INTERACTIVA */}
       <section id="booking" className="max-w-5xl mx-auto px-4 sm:px-8 pt-6 pb-12">
         <div className="bg-white border border-[#DDD6CC] p-6 sm:p-10 shadow-sm">
           <div className="text-center max-w-xl mx-auto mb-8 space-y-2">
@@ -2228,8 +2505,59 @@ export default function App() {
                 </div>
               )}
 
+              {/* PASO 3: MÉTODO DE PAGO INCRUSTADO + APARTADO $20 + ACCESO DIRECTO A MESSAGES */}
               {bookingStep === 3 && (
                 <div className="space-y-5">
+                  {/* Tarjeta con Métodos de Pago Incrustados */}
+                  <div className="p-4 sm:p-5 bg-[#F7F4EF] border border-[#C5A059] space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-serif text-xl flex items-center gap-2">
+                        <CreditCard size={18} className="text-[#C5A059]" />
+                        {t.paymentTitle}
+                      </h3>
+                      <span className="px-2.5 py-1 bg-[#222120] text-[#C5A059] text-xs font-bold">
+                        $20 USD
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-600 leading-relaxed">{t.paymentSub}</p>
+
+                    <div className="space-y-2">
+                      {paymentMethods.map((pm) => (
+                        <div
+                          key={pm.id}
+                          className="p-3 bg-white border border-[#DDD6CC] flex items-center justify-between gap-2"
+                        >
+                          <div className="min-w-0">
+                            <span className="text-[10px] uppercase tracking-widest text-[#C5A059] font-bold block">
+                              {pm.label}
+                            </span>
+                            <span className="text-xs sm:text-sm font-semibold break-all">
+                              {pm.value}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => copyTextValue(pm.id, pm.value)}
+                            className="shrink-0 px-3 py-1.5 bg-[#F7F4EF] border border-[#DDD6CC] hover:border-[#222120] text-[11px] uppercase tracking-wider font-semibold flex items-center gap-1"
+                          >
+                            {copiedKey === pm.id ? (
+                              <>
+                                <Check size={12} className="text-emerald-700" />
+                                {lang === 'EN' ? 'Copied' : 'Copiado'}
+                              </>
+                            ) : (
+                              <>
+                                <Copy size={12} />
+                                {lang === 'EN' ? 'Copy' : 'Copiar'}
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Aceptación del apartado de $20 no reembolsable */}
                   <div className="p-4 bg-[#F3DCE0]/45 border border-[#F3DCE0] space-y-3">
                     <p className="text-xs sm:text-sm font-medium text-[#222120] leading-relaxed">
                       {globalPolicy[lang]}
@@ -2245,37 +2573,50 @@ export default function App() {
                     </label>
                   </div>
 
-                  {copiedAlert && (
+                  {bookingFeedback && (
                     <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-medium text-center">
-                      {t.copiedSuccess}
+                      {t.bookedBanner}
                     </div>
                   )}
 
-                  <div className="space-y-3">
+                  {/* CTA Principal: Acceso Directo a Messages (SMS) + Opciones Secundarias */}
+                  <div className="space-y-2.5">
                     <a
-                      href="https://www.instagram.com/tinastudioo/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={handleBookViaInstagram}
-                      className={`w-full py-4 px-6 text-xs uppercase tracking-[0.2em] font-bold flex items-center justify-center gap-2 transition-all ${
+                      href={smsHref}
+                      onClick={handleConfirmAction}
+                      className={`w-full py-4 px-6 text-xs uppercase tracking-[0.18em] font-bold flex items-center justify-center gap-2 transition-all ${
                         policyAccepted
                           ? 'bg-[#222120] text-white hover:bg-black'
                           : 'bg-gray-300 text-gray-500 cursor-not-allowed pointer-events-none'
                       }`}
                     >
-                      <Instagram size={18} /> {t.bookDmBtn}
+                      <MessageSquare size={18} className="text-[#C5A059]" /> {t.sendMessageBtn}
+                    </a>
+
+                    <a
+                      href="https://www.instagram.com/tinastudioo/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={handleConfirmAction}
+                      className={`w-full py-3 px-5 bg-white border border-[#DDD6CC] text-[#222120] text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 transition-colors ${
+                        policyAccepted
+                          ? 'hover:border-[#222120]'
+                          : 'opacity-45 cursor-not-allowed pointer-events-none'
+                      }`}
+                    >
+                      <Instagram size={15} /> {t.bookIgSecondaryBtn}
                     </a>
 
                     <button
                       type="button"
                       onClick={handleDownloadICS}
-                      className="w-full py-3 px-5 bg-white border border-[#222120] text-[#222120] text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 hover:bg-[#F7F4EF]"
+                      className="w-full py-3 px-5 bg-[#F7F4EF] border border-[#DDD6CC] text-[#222120] text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 hover:border-[#222120]"
                     >
                       <Download size={15} /> {t.downloadIcsBtn}
                     </button>
                   </div>
 
-                  <p className="text-xs text-gray-500 text-center leading-relaxed">{t.dmHelper}</p>
+                  <p className="text-xs text-gray-500 text-center leading-relaxed">{t.msgHelper}</p>
 
                   <button
                     onClick={() => setBookingStep(2)}
@@ -2287,7 +2628,7 @@ export default function App() {
               )}
             </div>
 
-            {/* Columna Derecha: Resumen Persistente */}
+            {/* Columna Derecha: Resumen con Apartado $20 y Saldo Restante */}
             <div className="lg:col-span-5 bg-[#F7F4EF] border border-[#DDD6CC] p-6 flex flex-col justify-between space-y-6">
               <div className="space-y-4">
                 <h3 className="font-serif text-2xl border-b border-[#DDD6CC] pb-3">
@@ -2343,17 +2684,22 @@ export default function App() {
                   <span className="text-xs uppercase tracking-widest text-gray-600">{t.estTotal}</span>
                   <span className="font-serif text-3xl">${totalAmount}</span>
                 </div>
-                <div className="flex justify-between items-baseline text-xs font-semibold text-[#C5A059]">
+                <div className="flex justify-between items-baseline text-xs font-bold text-[#C5A059]">
                   <span>{t.depositRequired}</span>
-                  <span>${(totalAmount / 2).toFixed(2)}</span>
+                  <span>${DEPOSIT_AMOUNT}.00</span>
                 </div>
+                {totalAmount > 0 && (
+                  <div className="flex justify-between items-baseline text-xs text-gray-600 pt-1 border-t border-[#DDD6CC]/60">
+                    <span>{t.balanceAtStudio}</span>
+                    <span className="font-semibold">${remainingBalance.toFixed(2)}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* FOOTER CON ACCESO AL PERFIL PRIVADO */}
       <footer className="border-t border-[#DDD6CC] bg-[#EDEAE4] py-10 px-4 text-center space-y-5">
         <TinaLogo size="footer" />
         <div className="flex items-center justify-center gap-6 text-xs uppercase tracking-widest font-semibold">
@@ -2376,12 +2722,12 @@ export default function App() {
         </div>
       </footer>
 
-      {/* BARRA INFERIOR FIJA EN MÓVIL */}
       {cartItems.length > 0 && (
         <div className="fixed bottom-0 inset-x-0 z-30 sm:hidden bg-[#222120] text-white px-4 py-3 flex items-center justify-between border-t border-white/10">
           <div>
             <span className="text-[10px] uppercase tracking-widest text-gray-300 block">
-              {cartItems.length} {lang === 'EN' ? 'service(s)' : 'servicio(s)'}
+              {cartItems.length} {lang === 'EN' ? 'service(s)' : 'servicio(s)'} · $20{' '}
+              {lang === 'EN' ? 'deposit' : 'apartado'}
             </span>
             <span className="font-serif text-xl">${totalAmount}</span>
           </div>
@@ -2394,7 +2740,6 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL DETALLES DE SERVICIO Y POLÍTICA */}
       {selectedServiceModal && (
         <div
           onClick={() => setSelectedServiceModal(null)}
@@ -2439,7 +2784,7 @@ export default function App() {
 
             <div className="p-3.5 bg-[#F3DCE0]/45 border border-[#F3DCE0] text-xs text-[#222120]">
               <strong className="uppercase tracking-wider block mb-1">
-                {lang === 'EN' ? 'Booking Policy (50% Deposit)' : 'Condición de Reserva (50%)'}
+                {lang === 'EN' ? 'Booking Policy ($20 Deposit)' : 'Condición de Reserva ($20)'}
               </strong>
               {lang === 'EN' ? selectedServiceModal.policyEN : selectedServiceModal.policyES}
             </div>
@@ -2465,7 +2810,6 @@ export default function App() {
         </div>
       )}
 
-      {/* MODAL DE VALIDACIÓN DE PIN PARA PERFIL PRIVADO */}
       {showPinModal && (
         <div
           onClick={() => {
@@ -2488,47 +2832,48 @@ export default function App() {
               <p className="text-xs text-gray-500 mt-1">{t.enterPinSub}</p>
             </div>
 
-            <div className="flex justify-center gap-3 py-2">
-              {[0, 1, 2, 3].map((idx) => (
-                <span
-                  key={idx}
-                  className={`w-3.5 h-3.5 rounded-full border ${
-                    pinEntry.length > idx
-                      ? 'bg-[#222120] border-[#222120]'
-                      : 'bg-transparent border-gray-400'
-                  }`}
-                />
-              ))}
+            <div className="py-2 border-b-2 border-[#222120] font-mono text-2xl tracking-[0.5em] text-[#222120]">
+              {pinEntry.padEnd(4, '•')}
             </div>
+
+            {pinError && (
+              <p className="text-xs text-red-700 font-semibold">
+                {lang === 'EN' ? 'Incorrect PIN. Try again.' : 'PIN incorrecto. Intenta de nuevo.'}
+              </p>
+            )}
 
             <div className="grid grid-cols-3 gap-2">
               {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((digit) => (
                 <button
                   key={digit}
+                  type="button"
                   onClick={() => handlePinDigit(digit)}
-                  className="py-3.5 bg-[#F7F4EF] hover:bg-[#DDD6CC] font-semibold text-base transition-colors"
+                  className="py-3.5 bg-[#F7F4EF] active:bg-[#DDD6CC] font-semibold text-base touch-manipulation select-none"
                 >
                   {digit}
                 </button>
               ))}
               <button
+                type="button"
                 onClick={() => setPinEntry('')}
-                className="py-3.5 text-xs uppercase tracking-wider font-bold text-red-700"
+                className="py-3.5 text-xs uppercase tracking-wider font-bold text-red-700 touch-manipulation"
               >
                 Clear
               </button>
               <button
+                type="button"
                 onClick={() => handlePinDigit('0')}
-                className="py-3.5 bg-[#F7F4EF] hover:bg-[#DDD6CC] font-semibold text-base transition-colors"
+                className="py-3.5 bg-[#F7F4EF] active:bg-[#DDD6CC] font-semibold text-base touch-manipulation select-none"
               >
                 0
               </button>
               <button
+                type="button"
                 onClick={() => {
                   setShowPinModal(false);
                   setPinEntry('');
                 }}
-                className="py-3.5 text-xs uppercase tracking-wider text-gray-500"
+                className="py-3.5 text-xs uppercase tracking-wider text-gray-500 touch-manipulation"
               >
                 Close
               </button>
