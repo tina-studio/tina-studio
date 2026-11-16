@@ -481,7 +481,7 @@ export default function App() {
   const [selectedServiceModal, setSelectedServiceModal] = useState(null);
 
   // Carrito y flujo de reserva
-  const [cartIds, setCartIds] = useState(['lash-hybrid']);
+  const [cartIds, setCartIds] = useState([]);
   const [bookingStep, setBookingStep] = useState(1);
   const [viewMonth, setViewMonth] = useState(() => {
     const now = new Date();
