@@ -29,9 +29,8 @@ import tinaLogo from '../tina studio (1).png';
 
 // ============================================================================
 // URL DEL PUENTE EN LA NUBE (GOOGLE APPS SCRIPT /exec)
-// 'https://script.google.com/macros/s/AKfycbwpIM1imVxZZsuI79KMZPOqAocQP0vxP9cAhxNhDX3kDxzzH4h3lpO8zaE7LLkJH9kNpQ/exec'
 // ============================================================================
-const HARDCODED_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwpIM1imVxZZsuI79KMZPOqAocQP0vxP9cAhxNhDX3kDxzzH4h3lpO8zaE7LLkJH9kNpQ/exec';
+const HARDCODED_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwpIM1imVxZZsUI79KMZP0qAocQP0vxP9cAhxNhDX3kDxzzH4h3lpO8zaE7LLkJH9kNpQ/exec';
 
 const ENV_SCRIPT_URL =
   typeof import.meta !== 'undefined' && import.meta.env
@@ -516,6 +515,7 @@ export default function App() {
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
   const [clientName, setClientName] = useState('');
+  const [clientContactInfo, setClientContactInfo] = useState('');
   const [clientIg, setClientIg] = useState('');
   const [clientNotes, setClientNotes] = useState('');
   const [policyAccepted, setPolicyAccepted] = useState(false);
@@ -526,7 +526,7 @@ export default function App() {
   // Estados sincronizados con Google Drive/Sheets + respaldo local
   const [services, setServices] = useState(() => {
     try {
-      const saved = localStorage.getItem('tina_studio_services_v9');
+      const saved = localStorage.getItem('tina_studio_services_v10');
       return saved ? JSON.parse(saved) : INITIAL_SERVICES;
     } catch {
       return INITIAL_SERVICES;
@@ -534,14 +534,14 @@ export default function App() {
   });
   const [nailsEnabled, setNailsEnabled] = useState(() => {
     try {
-      return localStorage.getItem('tina_studio_nails_v9') === 'true';
+      return localStorage.getItem('tina_studio_nails_v10') === 'true';
     } catch {
       return false;
     }
   });
   const [globalPolicy, setGlobalPolicy] = useState(() => {
     try {
-      const saved = localStorage.getItem('tina_studio_policy_v9');
+      const saved = localStorage.getItem('tina_studio_policy_v10');
       return saved ? JSON.parse(saved) : DEFAULT_GLOBAL_POLICY;
     } catch {
       return DEFAULT_GLOBAL_POLICY;
@@ -549,7 +549,7 @@ export default function App() {
   });
   const [paymentMethods, setPaymentMethods] = useState(() => {
     try {
-      const saved = localStorage.getItem('tina_studio_payments_v9');
+      const saved = localStorage.getItem('tina_studio_payments_v10');
       return saved ? JSON.parse(saved) : DEFAULT_PAYMENT_METHODS;
     } catch {
       return DEFAULT_PAYMENT_METHODS;
@@ -557,7 +557,7 @@ export default function App() {
   });
   const [studioPhone, setStudioPhone] = useState(() => {
     try {
-      const saved = localStorage.getItem('tina_studio_phone_v9');
+      const saved = localStorage.getItem('tina_studio_phone_v10');
       return saved && saved.trim() ? saved : DEFAULT_STUDIO_PHONE;
     } catch {
       return DEFAULT_STUDIO_PHONE;
@@ -565,7 +565,7 @@ export default function App() {
   });
   const [scheduleOverrides, setScheduleOverrides] = useState(() => {
     try {
-      const saved = localStorage.getItem('tina_studio_schedule_v9');
+      const saved = localStorage.getItem('tina_studio_schedule_v10');
       return saved ? JSON.parse(saved) : {};
     } catch {
       return {};
@@ -573,7 +573,7 @@ export default function App() {
   });
   const [bookings, setBookings] = useState(() => {
     try {
-      const saved = localStorage.getItem('tina_studio_bookings_v9');
+      const saved = localStorage.getItem('tina_studio_bookings_v10');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -581,14 +581,14 @@ export default function App() {
   });
   const [adminPin, setAdminPin] = useState(() => {
     try {
-      return localStorage.getItem('tina_studio_pin_v9') || '2004';
+      return localStorage.getItem('tina_studio_pin_v10') || '2004';
     } catch {
       return '2004';
     }
   });
   const [customScriptUrl, setCustomScriptUrl] = useState(() => {
     try {
-      return localStorage.getItem('tina_studio_script_v9') || '';
+      return localStorage.getItem('tina_studio_script_v10') || '';
     } catch {
       return '';
     }
@@ -650,14 +650,14 @@ export default function App() {
   // Guardar respaldo en localStorage
   useEffect(() => {
     try {
-      localStorage.setItem('tina_studio_services_v9', JSON.stringify(services));
-      localStorage.setItem('tina_studio_nails_v9', String(nailsEnabled));
-      localStorage.setItem('tina_studio_policy_v9', JSON.stringify(globalPolicy));
-      localStorage.setItem('tina_studio_payments_v9', JSON.stringify(paymentMethods));
-      localStorage.setItem('tina_studio_phone_v9', studioPhone);
-      localStorage.setItem('tina_studio_schedule_v9', JSON.stringify(scheduleOverrides));
-      localStorage.setItem('tina_studio_bookings_v9', JSON.stringify(bookings));
-      localStorage.setItem('tina_studio_pin_v9', adminPin);
+      localStorage.setItem('tina_studio_services_v10', JSON.stringify(services));
+      localStorage.setItem('tina_studio_nails_v10', String(nailsEnabled));
+      localStorage.setItem('tina_studio_policy_v10', JSON.stringify(globalPolicy));
+      localStorage.setItem('tina_studio_payments_v10', JSON.stringify(paymentMethods));
+      localStorage.setItem('tina_studio_phone_v10', studioPhone);
+      localStorage.setItem('tina_studio_schedule_v10', JSON.stringify(scheduleOverrides));
+      localStorage.setItem('tina_studio_bookings_v10', JSON.stringify(bookings));
+      localStorage.setItem('tina_studio_pin_v10', adminPin);
     } catch {}
   }, [
     services,
@@ -887,6 +887,7 @@ export default function App() {
       availableSlots: 'Available Time Slots',
       bookedLabel: 'Booked',
       fullName: 'Full Name *',
+      contactInfoLabel: 'Phone Number or Email *',
       igHandle: 'Instagram Username (e.g. @maria) *',
       notesLabel: 'Notes or Lash Preferences (Optional)',
       continueBtn: 'Continue',
@@ -937,6 +938,7 @@ export default function App() {
       availableSlots: 'Cupos y Horarios Disponibles',
       bookedLabel: 'Ocupado',
       fullName: 'Nombre Completo *',
+      contactInfoLabel: 'Número de Teléfono o Email *',
       igHandle: 'Usuario de Instagram (ej. @maria) *',
       notesLabel: 'Notas o preferencias (Opcional)',
       continueBtn: 'Continuar',
@@ -1074,6 +1076,7 @@ export default function App() {
       return [
         `¡Hola Tina Studio! ✨ Ya agendé mi cita en la web y te envío por aquí mi comprobante de pago del apartado de $20 no reembolsable:`,
         `• Nombre: ${clientName}`,
+        `• Teléfono / Email: ${clientContactInfo}`,
         `• Instagram: ${clientIg || 'N/A'}`,
         `• Servicios: ${serviceSummary}`,
         `• Fecha y Hora: ${selectedDate} a las ${selectedTime}`,
@@ -1086,6 +1089,7 @@ export default function App() {
     return [
       `Hi Tina Studio! ✨ I just booked my appointment on the website and I am sending my $20 non-refundable deposit payment receipt right now:`,
       `• Name: ${clientName}`,
+      `• Phone / Email: ${clientContactInfo}`,
       `• Instagram: ${clientIg || 'N/A'}`,
       `• Services: ${serviceSummary}`,
       `• Date & Time: ${selectedDate} at ${selectedTime}`,
@@ -1098,6 +1102,7 @@ export default function App() {
     lang,
     cartItems,
     clientName,
+    clientContactInfo,
     clientIg,
     selectedDate,
     selectedTime,
@@ -1113,6 +1118,7 @@ export default function App() {
   // REGISTRO BLINDADO EN GOOGLE CALENDAR ANTES DE ABRIR MENSAJES / INSTAGRAM
   const registerBookingRecord = async () => {
     const serviceSummary = cartItems.map((i) => `${i.name} ($${i.price})`).join(', ');
+    const combinedContact = `${clientIg} | ${clientContactInfo}`;
 
     try {
       await navigator.clipboard.writeText(bookingReceiptMessage);
@@ -1128,6 +1134,7 @@ export default function App() {
       const newBooking = {
         id: Date.now().toString(),
         clientName,
+        clientContactInfo,
         clientIg,
         services: serviceSummary,
         date: selectedDate,
@@ -1163,7 +1170,8 @@ export default function App() {
         body: JSON.stringify({
           action: 'createBooking',
           clientName,
-          contact: clientIg,
+          contact: combinedContact,
+          phoneOrEmail: clientContactInfo,
           service: serviceSummary,
           date: selectedDate,
           time: selectedTime,
@@ -1188,7 +1196,13 @@ export default function App() {
 
   const handleConfirmAction = async (e, targetUrl, openInNewTab = false) => {
     e.preventDefault();
-    if (!policyAccepted || !selectedDate || !selectedTime || !clientName.trim()) {
+    if (
+      !policyAccepted ||
+      !selectedDate ||
+      !selectedTime ||
+      !clientName.trim() ||
+      !clientContactInfo.trim()
+    ) {
       return;
     }
 
@@ -1954,6 +1968,53 @@ export default function App() {
                   </div>
                 </div>
               </div>
+
+              {/* Solicitudes registradas en este dispositivo */}
+              <div className="bg-white border border-[#DDD6CC] p-5 space-y-3">
+                <h3 className="font-serif text-xl">
+                  {lang === 'EN'
+                    ? 'Logged Booking Requests (This Device)'
+                    : 'Reservas Registradas (Este Dispositivo)'}
+                </h3>
+                {bookings.length === 0 ? (
+                  <p className="text-xs text-gray-500 italic">
+                    {lang === 'EN'
+                      ? 'No local bookings stored on this device.'
+                      : 'No hay reservas locales guardadas en este dispositivo.'}
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {bookings.map((b) => (
+                      <div
+                        key={b.id}
+                        className="p-3.5 bg-[#F7F4EF] border border-[#DDD6CC] text-xs space-y-1"
+                      >
+                        <div className="flex justify-between font-bold text-sm">
+                          <span>{b.clientName}</span>
+                          <span className="text-[#C5A059]">${b.total}</span>
+                        </div>
+                        <p>
+                          <strong>{b.date}</strong> · {b.time}
+                        </p>
+                        <p className="text-gray-600">{b.services}</p>
+                        <div className="flex justify-between items-center pt-2">
+                          <span className="text-gray-500">
+                            {b.clientContactInfo || ''} {b.clientIg ? `· ${b.clientIg}` : ''}
+                          </span>
+                          <button
+                            onClick={() =>
+                              setBookings((prev) => prev.filter((item) => item.id !== b.id))
+                            }
+                            className="text-red-700 flex items-center gap-1 hover:underline"
+                          >
+                            <Trash2 size={12} /> {lang === 'EN' ? 'Remove' : 'Eliminar'}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
@@ -2122,8 +2183,8 @@ export default function App() {
                 <h2 className="font-serif text-xl">Google Cloud Sync (All Devices)</h2>
                 <p className="text-xs text-gray-600">
                   {lang === 'EN'
-                    ? 'To make changes visible on every phone, paste the Google Apps Script Web App URL (/exec) in HARDCODED_SCRIPT_URL inside src/App.jsx or set VITE_GOOGLE_SCRIPT_URL in Vercel.'
-                    : 'Para que cualquier teléfono vea los cambios, pega la URL /exec de Google Apps Script en HARDCODED_SCRIPT_URL dentro de src/App.jsx o como variable VITE_GOOGLE_SCRIPT_URL en Vercel.'}
+                    ? 'Connected Web App URL (/exec). Changes made here sync automatically to all client devices.'
+                    : 'URL /exec conectada. Todos los cambios realizados aquí se sincronizan en todos los teléfonos.'}
                 </p>
                 <input
                   type="text"
@@ -2131,7 +2192,7 @@ export default function App() {
                   onChange={(e) => {
                     setCustomScriptUrl(e.target.value);
                     try {
-                      localStorage.setItem('tina_studio_script_v9', e.target.value);
+                      localStorage.setItem('tina_studio_script_v10', e.target.value);
                     } catch {}
                   }}
                   placeholder="https://script.google.com/macros/s/.../exec"
@@ -2421,7 +2482,13 @@ export default function App() {
               {t.step2}
             </button>
             <button
-              onClick={() => selectedDate && selectedTime && clientName && setBookingStep(3)}
+              onClick={() =>
+                selectedDate &&
+                selectedTime &&
+                clientName.trim() &&
+                clientContactInfo.trim() &&
+                setBookingStep(3)
+              }
               className={
                 bookingStep === 3 ? 'text-[#222120] underline underline-offset-8' : 'text-gray-400'
               }
@@ -2551,6 +2618,18 @@ export default function App() {
                   </div>
                   <div>
                     <label className="block text-xs uppercase tracking-widest text-gray-600 mb-1.5">
+                      {t.contactInfoLabel}
+                    </label>
+                    <input
+                      type="text"
+                      value={clientContactInfo}
+                      onChange={(e) => setClientContactInfo(e.target.value)}
+                      placeholder="+1 (555) 123-4567 / camila@email.com"
+                      className="w-full p-3.5 border border-[#DDD6CC] bg-[#F7F4EF] focus:bg-white outline-none focus:border-[#C5A059] text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs uppercase tracking-widest text-gray-600 mb-1.5">
                       {t.igHandle}
                     </label>
                     <input
@@ -2586,7 +2665,9 @@ export default function App() {
                       {t.backBtn}
                     </button>
                     <button
-                      disabled={!clientName.trim() || !clientIg.trim()}
+                      disabled={
+                        !clientName.trim() || !clientContactInfo.trim() || !clientIg.trim()
+                      }
                       onClick={() => setBookingStep(3)}
                       className="px-7 py-3.5 bg-[#222120] text-white text-xs uppercase tracking-widest font-semibold disabled:opacity-40 flex items-center gap-2"
                     >
