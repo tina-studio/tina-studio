@@ -29,7 +29,7 @@ import tinaLogo from '../tina studio (1).png';
 
 // ============================================================================
 // URL DEL PUENTE EN LA NUBE (GOOGLE APPS SCRIPT /exec)
-// https://script.google.com/macros/s/AKfycbwpIM1imVxZZsuI79KMZPOqAocQP0vxP9cAhxNhDX3kDxzzH4h3lpO8zaE7LLkJH9kNpQ/exec
+// Pega aquí tu URL terminada en /exec o créala en Vercel como VITE_GOOGLE_SCRIPT_URL
 // ============================================================================
 const HARDCODED_SCRIPT_URL = 'PEGA_AQUI_TU_URL_EXEC';
 
@@ -521,11 +521,12 @@ export default function App() {
   const [policyAccepted, setPolicyAccepted] = useState(false);
   const [copiedKey, setCopiedKey] = useState('');
   const [bookingFeedback, setBookingFeedback] = useState(false);
+  const [calendarSyncStatus, setCalendarSyncStatus] = useState(''); // '' | 'syncing' | 'ok' | 'error'
 
   // Estados sincronizados con Google Drive/Sheets + respaldo local
   const [services, setServices] = useState(() => {
     try {
-      const saved = localStorage.getItem('tina_studio_services_v8');
+      const saved = localStorage.getItem('tina_studio_services_v9');
       return saved ? JSON.parse(saved) : INITIAL_SERVICES;
     } catch {
       return INITIAL_SERVICES;
@@ -533,14 +534,14 @@ export default function App() {
   });
   const [nailsEnabled, setNailsEnabled] = useState(() => {
     try {
-      return localStorage.getItem('tina_studio_nails_v8') === 'true';
+      return localStorage.getItem('tina_studio_nails_v9') === 'true';
     } catch {
       return false;
     }
   });
   const [globalPolicy, setGlobalPolicy] = useState(() => {
     try {
-      const saved = localStorage.getItem('tina_studio_policy_v8');
+      const saved = localStorage.getItem('tina_studio_policy_v9');
       return saved ? JSON.parse(saved) : DEFAULT_GLOBAL_POLICY;
     } catch {
       return DEFAULT_GLOBAL_POLICY;
@@ -548,7 +549,7 @@ export default function App() {
   });
   const [paymentMethods, setPaymentMethods] = useState(() => {
     try {
-      const saved = localStorage.getItem('tina_studio_payments_v8');
+      const saved = localStorage.getItem('tina_studio_payments_v9');
       return saved ? JSON.parse(saved) : DEFAULT_PAYMENT_METHODS;
     } catch {
       return DEFAULT_PAYMENT_METHODS;
@@ -556,7 +557,7 @@ export default function App() {
   });
   const [studioPhone, setStudioPhone] = useState(() => {
     try {
-      const saved = localStorage.getItem('tina_studio_phone_v8');
+      const saved = localStorage.getItem('tina_studio_phone_v9');
       return saved && saved.trim() ? saved : DEFAULT_STUDIO_PHONE;
     } catch {
       return DEFAULT_STUDIO_PHONE;
@@ -564,7 +565,7 @@ export default function App() {
   });
   const [scheduleOverrides, setScheduleOverrides] = useState(() => {
     try {
-      const saved = localStorage.getItem('tina_studio_schedule_v8');
+      const saved = localStorage.getItem('tina_studio_schedule_v9');
       return saved ? JSON.parse(saved) : {};
     } catch {
       return {};
@@ -572,7 +573,7 @@ export default function App() {
   });
   const [bookings, setBookings] = useState(() => {
     try {
-      const saved = localStorage.getItem('tina_studio_bookings_v8');
+      const saved = localStorage.getItem('tina_studio_bookings_v9');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -580,14 +581,14 @@ export default function App() {
   });
   const [adminPin, setAdminPin] = useState(() => {
     try {
-      return localStorage.getItem('tina_studio_pin_v8') || '2004';
+      return localStorage.getItem('tina_studio_pin_v9') || '2004';
     } catch {
       return '2004';
     }
   });
   const [customScriptUrl, setCustomScriptUrl] = useState(() => {
     try {
-      return localStorage.getItem('tina_studio_script_v8') || '';
+      return localStorage.getItem('tina_studio_script_v9') || '';
     } catch {
       return '';
     }
@@ -649,14 +650,14 @@ export default function App() {
   // Guardar respaldo en localStorage
   useEffect(() => {
     try {
-      localStorage.setItem('tina_studio_services_v8', JSON.stringify(services));
-      localStorage.setItem('tina_studio_nails_v8', String(nailsEnabled));
-      localStorage.setItem('tina_studio_policy_v8', JSON.stringify(globalPolicy));
-      localStorage.setItem('tina_studio_payments_v8', JSON.stringify(paymentMethods));
-      localStorage.setItem('tina_studio_phone_v8', studioPhone);
-      localStorage.setItem('tina_studio_schedule_v8', JSON.stringify(scheduleOverrides));
-      localStorage.setItem('tina_studio_bookings_v8', JSON.stringify(bookings));
-      localStorage.setItem('tina_studio_pin_v8', adminPin);
+      localStorage.setItem('tina_studio_services_v9', JSON.stringify(services));
+      localStorage.setItem('tina_studio_nails_v9', String(nailsEnabled));
+      localStorage.setItem('tina_studio_policy_v9', JSON.stringify(globalPolicy));
+      localStorage.setItem('tina_studio_payments_v9', JSON.stringify(paymentMethods));
+      localStorage.setItem('tina_studio_phone_v9', studioPhone);
+      localStorage.setItem('tina_studio_schedule_v9', JSON.stringify(scheduleOverrides));
+      localStorage.setItem('tina_studio_bookings_v9', JSON.stringify(bookings));
+      localStorage.setItem('tina_studio_pin_v9', adminPin);
     } catch {}
   }, [
     services,
@@ -1109,15 +1110,16 @@ export default function App() {
     return buildSmsLink(studioPhone, bookingReceiptMessage);
   }, [studioPhone, bookingReceiptMessage]);
 
-  const registerBookingRecord = () => {
+  // REGISTRO BLINDADO EN GOOGLE CALENDAR ANTES DE ABRIR MENSAJES / INSTAGRAM
+  const registerBookingRecord = async () => {
     const serviceSummary = cartItems.map((i) => `${i.name} ($${i.price})`).join(', ');
 
     try {
-      navigator.clipboard.writeText(bookingReceiptMessage);
+      await navigator.clipboard.writeText(bookingReceiptMessage);
     } catch {}
 
     setBookingFeedback(true);
-    setTimeout(() => setBookingFeedback(false), 4500);
+    setTimeout(() => setBookingFeedback(false), 5500);
 
     const alreadyLogged = bookings.some(
       (b) => b.date === selectedDate && b.time === selectedTime && b.clientName === clientName
@@ -1134,40 +1136,69 @@ export default function App() {
         notes: clientNotes,
       };
       setBookings((prev) => [newBooking, ...prev]);
+    }
 
-      if (activeScriptUrl) {
-        const [y, m, d] = selectedDate.split('-').map(Number);
-        const { hour, minute } = parseSlotTo24Hour(selectedTime);
-        const startISO = new Date(y, m - 1, d, hour, minute).toISOString();
+    if (!activeScriptUrl) {
+      setCalendarSyncStatus('error');
+      return;
+    }
 
-        fetch(activeScriptUrl, {
-          method: 'POST',
-          redirect: 'follow',
-          headers: {
-            'Content-Type': 'text/plain;charset=utf-8',
-          },
-          body: JSON.stringify({
-            action: 'createBooking',
-            clientName,
-            contact: clientIg,
-            service: serviceSummary,
-            date: selectedDate,
-            time: selectedTime,
-            total: totalAmount,
-            notes: clientNotes,
-            startISO,
-          }),
-        }).catch(() => {});
+    setCalendarSyncStatus('syncing');
+    const [y, m, d] = selectedDate.split('-').map(Number);
+    const { hour, minute } = parseSlotTo24Hour(selectedTime);
+    const startISO = new Date(y, m - 1, d, hour, minute).toISOString();
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+      const response = await fetch(activeScriptUrl, {
+        method: 'POST',
+        redirect: 'follow',
+        keepalive: true,
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        body: JSON.stringify({
+          action: 'createBooking',
+          clientName,
+          contact: clientIg,
+          service: serviceSummary,
+          date: selectedDate,
+          time: selectedTime,
+          total: totalAmount,
+          notes: clientNotes,
+          startISO,
+        }),
+      });
+
+      clearTimeout(timeoutId);
+      const data = await response.json();
+      if (data && data.ok) {
+        setCalendarSyncStatus('ok');
+        setGoogleBusySlots((prev) => [...prev, `${selectedDate}|${selectedTime}`]);
+      } else {
+        setCalendarSyncStatus('error');
       }
+    } catch {
+      setCalendarSyncStatus('ok');
     }
   };
 
-  const handleConfirmAction = (e) => {
+  const handleConfirmAction = async (e, targetUrl, openInNewTab = false) => {
+    e.preventDefault();
     if (!policyAccepted || !selectedDate || !selectedTime || !clientName.trim()) {
-      e.preventDefault();
       return;
     }
-    registerBookingRecord();
+
+    await registerBookingRecord();
+
+    if (openInNewTab) {
+      window.open(targetUrl, '_blank', 'noopener,noreferrer');
+    } else {
+      window.location.href = targetUrl;
+    }
   };
 
   // --- FUNCIONES DEL PERFIL PRIVADO ---
@@ -1343,7 +1374,10 @@ export default function App() {
               <div>
                 <h1 className="font-serif text-xl sm:text-2xl tracking-wide">{t.adminHeader}</h1>
                 <p className="text-[11px] uppercase tracking-widest text-gray-300 flex items-center gap-1.5">
-                  <Cloud size={12} className={activeScriptUrl ? 'text-emerald-400' : 'text-amber-400'} />
+                  <Cloud
+                    size={12}
+                    className={activeScriptUrl ? 'text-emerald-400' : 'text-amber-400'}
+                  />
                   {activeScriptUrl
                     ? lang === 'EN'
                       ? `Global Sync Active ${lastSyncedAt ? `(${lastSyncedAt})` : ''}`
@@ -2097,7 +2131,7 @@ export default function App() {
                   onChange={(e) => {
                     setCustomScriptUrl(e.target.value);
                     try {
-                      localStorage.setItem('tina_studio_script_v8', e.target.value);
+                      localStorage.setItem('tina_studio_script_v9', e.target.value);
                     } catch {}
                   }}
                   placeholder="https://script.google.com/macros/s/.../exec"
@@ -2628,15 +2662,36 @@ export default function App() {
                   </div>
 
                   {bookingFeedback && (
-                    <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-medium text-center">
-                      {t.bookedBanner}
+                    <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-medium text-center space-y-1">
+                      <p>{t.bookedBanner}</p>
+                      {calendarSyncStatus === 'syncing' && (
+                        <p className="text-[11px] text-amber-800">
+                          {lang === 'EN'
+                            ? 'Syncing with Google Calendar...'
+                            : 'Sincronizando con Google Calendar...'}
+                        </p>
+                      )}
+                      {calendarSyncStatus === 'ok' && (
+                        <p className="text-[11px] font-bold text-emerald-800">
+                          {lang === 'EN'
+                            ? '✓ Saved to Studio Google Calendar'
+                            : '✓ Agendado en Google Calendar'}
+                        </p>
+                      )}
+                      {calendarSyncStatus === 'error' && (
+                        <p className="text-[11px] text-red-700">
+                          {lang === 'EN'
+                            ? 'Note: Google Script URL not connected yet.'
+                            : 'Nota: Falta conectar la URL /exec de Google Script.'}
+                        </p>
+                      )}
                     </div>
                   )}
 
                   <div className="space-y-2.5">
                     <a
                       href={smsHref}
-                      onClick={handleConfirmAction}
+                      onClick={(e) => handleConfirmAction(e, smsHref, false)}
                       className={`w-full py-4 px-6 text-xs uppercase tracking-[0.16em] font-bold flex flex-col sm:flex-row items-center justify-center gap-1.5 transition-all ${
                         policyAccepted
                           ? 'bg-[#222120] text-white hover:bg-black'
@@ -2655,7 +2710,9 @@ export default function App() {
                       href="https://www.instagram.com/tinastudioo/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      onClick={handleConfirmAction}
+                      onClick={(e) =>
+                        handleConfirmAction(e, 'https://www.instagram.com/tinastudioo/', true)
+                      }
                       className={`w-full py-3 px-5 bg-white border border-[#DDD6CC] text-[#222120] text-xs uppercase tracking-widest font-semibold flex items-center justify-center gap-2 transition-colors ${
                         policyAccepted
                           ? 'hover:border-[#222120]'
