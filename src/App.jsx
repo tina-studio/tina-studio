@@ -31,7 +31,7 @@ import tinaLogo from '../tina studio (1).png';
 // URL DEL PUENTE EN LA NUBE (GOOGLE APPS SCRIPT /exec)
 // https://script.google.com/macros/s/AKfycbwpIM1imVxZZsuI79KMZPOqAocQP0vxP9cAhxNhDX3kDxzzH4h3lpO8zaE7LLkJH9kNpQ/exec
 // ============================================================================
-const HARDCODED_SCRIPT_URL = 'PEGA_AQUI_TU_URL_EXEC';
+const HARDCODED_SCRIPT_URL = https://script.google.com/macros/s/AKfycbwpIM1imVxZZsuI79KMZPOqAocQP0vxP9cAhxNhDX3kDxzzH4h3lpO8zaE7LLkJH9kNpQ/exec;
 
 const ENV_SCRIPT_URL =
   typeof import.meta !== 'undefined' && import.meta.env
