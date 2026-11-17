@@ -30,7 +30,8 @@ import tinaLogo from '../tina studio (1).png';
 // ============================================================================
 // URL DEL PUENTE EN LA NUBE (GOOGLE APPS SCRIPT /exec)
 // ============================================================================
-const HARDCODED_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwpIM1imVxZZsUI79KMZP0qAocQP0vxP9cAhxNhDX3kDxzzH4h3lpO8zaE7LLkJH9kNpQ/exec';
+const HARDCODED_SCRIPT_URL =
+  'https://script.google.com/macros/s/AKfycbwpIM1imVxZZsuI79KMZPOqAocQP0vxP9cAhxNhDX3kDxzzH4h3lpO8zaE7LLkJH9kNpQ/exec';
 
 const ENV_SCRIPT_URL =
   typeof import.meta !== 'undefined' && import.meta.env
@@ -522,11 +523,12 @@ export default function App() {
   const [copiedKey, setCopiedKey] = useState('');
   const [bookingFeedback, setBookingFeedback] = useState(false);
   const [calendarSyncStatus, setCalendarSyncStatus] = useState(''); // '' | 'syncing' | 'ok' | 'error'
+  const [calendarErrorMsg, setCalendarErrorMsg] = useState('');
 
   // Estados sincronizados con Google Drive/Sheets + respaldo local
   const [services, setServices] = useState(() => {
     try {
-      const saved = localStorage.getItem('tina_studio_services_v10');
+      const saved = localStorage.getItem('tina_studio_services_v11');
       return saved ? JSON.parse(saved) : INITIAL_SERVICES;
     } catch {
       return INITIAL_SERVICES;
@@ -534,14 +536,14 @@ export default function App() {
   });
   const [nailsEnabled, setNailsEnabled] = useState(() => {
     try {
-      return localStorage.getItem('tina_studio_nails_v10') === 'true';
+      return localStorage.getItem('tina_studio_nails_v11') === 'true';
     } catch {
       return false;
     }
   });
   const [globalPolicy, setGlobalPolicy] = useState(() => {
     try {
-      const saved = localStorage.getItem('tina_studio_policy_v10');
+      const saved = localStorage.getItem('tina_studio_policy_v11');
       return saved ? JSON.parse(saved) : DEFAULT_GLOBAL_POLICY;
     } catch {
       return DEFAULT_GLOBAL_POLICY;
@@ -549,7 +551,7 @@ export default function App() {
   });
   const [paymentMethods, setPaymentMethods] = useState(() => {
     try {
-      const saved = localStorage.getItem('tina_studio_payments_v10');
+      const saved = localStorage.getItem('tina_studio_payments_v11');
       return saved ? JSON.parse(saved) : DEFAULT_PAYMENT_METHODS;
     } catch {
       return DEFAULT_PAYMENT_METHODS;
@@ -557,7 +559,7 @@ export default function App() {
   });
   const [studioPhone, setStudioPhone] = useState(() => {
     try {
-      const saved = localStorage.getItem('tina_studio_phone_v10');
+      const saved = localStorage.getItem('tina_studio_phone_v11');
       return saved && saved.trim() ? saved : DEFAULT_STUDIO_PHONE;
     } catch {
       return DEFAULT_STUDIO_PHONE;
@@ -565,7 +567,7 @@ export default function App() {
   });
   const [scheduleOverrides, setScheduleOverrides] = useState(() => {
     try {
-      const saved = localStorage.getItem('tina_studio_schedule_v10');
+      const saved = localStorage.getItem('tina_studio_schedule_v11');
       return saved ? JSON.parse(saved) : {};
     } catch {
       return {};
@@ -573,7 +575,7 @@ export default function App() {
   });
   const [bookings, setBookings] = useState(() => {
     try {
-      const saved = localStorage.getItem('tina_studio_bookings_v10');
+      const saved = localStorage.getItem('tina_studio_bookings_v11');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -581,26 +583,26 @@ export default function App() {
   });
   const [adminPin, setAdminPin] = useState(() => {
     try {
-      return localStorage.getItem('tina_studio_pin_v10') || '2004';
+      return localStorage.getItem('tina_studio_pin_v11') || '2004';
     } catch {
       return '2004';
     }
   });
   const [customScriptUrl, setCustomScriptUrl] = useState(() => {
     try {
-      return localStorage.getItem('tina_studio_script_v10') || '';
+      return localStorage.getItem('tina_studio_script_v11') || '';
     } catch {
       return '';
     }
   });
 
-  // Resolución de URL de la nube (Vercel Env > Hardcoded > Local)
+  // Resolución de URL de la nube (Hardcoded oficial > Vercel Env > Custom)
   const activeScriptUrl = useMemo(() => {
-    if (ENV_SCRIPT_URL && ENV_SCRIPT_URL.startsWith('https://script.google.com')) {
-      return ENV_SCRIPT_URL.trim();
-    }
     if (HARDCODED_SCRIPT_URL && HARDCODED_SCRIPT_URL.startsWith('https://script.google.com')) {
       return HARDCODED_SCRIPT_URL.trim();
+    }
+    if (ENV_SCRIPT_URL && ENV_SCRIPT_URL.startsWith('https://script.google.com')) {
+      return ENV_SCRIPT_URL.trim();
     }
     if (customScriptUrl && customScriptUrl.startsWith('https://script.google.com')) {
       return customScriptUrl.trim();
@@ -650,14 +652,14 @@ export default function App() {
   // Guardar respaldo en localStorage
   useEffect(() => {
     try {
-      localStorage.setItem('tina_studio_services_v10', JSON.stringify(services));
-      localStorage.setItem('tina_studio_nails_v10', String(nailsEnabled));
-      localStorage.setItem('tina_studio_policy_v10', JSON.stringify(globalPolicy));
-      localStorage.setItem('tina_studio_payments_v10', JSON.stringify(paymentMethods));
-      localStorage.setItem('tina_studio_phone_v10', studioPhone);
-      localStorage.setItem('tina_studio_schedule_v10', JSON.stringify(scheduleOverrides));
-      localStorage.setItem('tina_studio_bookings_v10', JSON.stringify(bookings));
-      localStorage.setItem('tina_studio_pin_v10', adminPin);
+      localStorage.setItem('tina_studio_services_v11', JSON.stringify(services));
+      localStorage.setItem('tina_studio_nails_v11', String(nailsEnabled));
+      localStorage.setItem('tina_studio_policy_v11', JSON.stringify(globalPolicy));
+      localStorage.setItem('tina_studio_payments_v11', JSON.stringify(paymentMethods));
+      localStorage.setItem('tina_studio_phone_v11', studioPhone);
+      localStorage.setItem('tina_studio_schedule_v11', JSON.stringify(scheduleOverrides));
+      localStorage.setItem('tina_studio_bookings_v11', JSON.stringify(bookings));
+      localStorage.setItem('tina_studio_pin_v11', adminPin);
     } catch {}
   }, [
     services,
@@ -1125,7 +1127,8 @@ export default function App() {
     } catch {}
 
     setBookingFeedback(true);
-    setTimeout(() => setBookingFeedback(false), 5500);
+    setCalendarErrorMsg('');
+    setTimeout(() => setBookingFeedback(false), 7500);
 
     const alreadyLogged = bookings.some(
       (b) => b.date === selectedDate && b.time === selectedTime && b.clientName === clientName
@@ -1147,6 +1150,7 @@ export default function App() {
 
     if (!activeScriptUrl) {
       setCalendarSyncStatus('error');
+      setCalendarErrorMsg('Falta la URL /exec de Google Script.');
       return;
     }
 
@@ -1157,7 +1161,7 @@ export default function App() {
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3500);
+      const timeoutId = setTimeout(() => controller.abort(), 9000);
 
       const response = await fetch(activeScriptUrl, {
         method: 'POST',
@@ -1188,9 +1192,15 @@ export default function App() {
         setGoogleBusySlots((prev) => [...prev, `${selectedDate}|${selectedTime}`]);
       } else {
         setCalendarSyncStatus('error');
+        setCalendarErrorMsg(data?.error || 'Error en Google Apps Script');
       }
     } catch {
-      setCalendarSyncStatus('ok');
+      setCalendarSyncStatus('error');
+      setCalendarErrorMsg(
+        lang === 'EN'
+          ? 'Could not confirm with Google Calendar. Verify permissions or New Version deployment.'
+          : 'No se pudo confirmar con Google Calendar. Revisa permisos o Nueva versión en Apps Script.'
+      );
     }
   };
 
@@ -2192,7 +2202,7 @@ export default function App() {
                   onChange={(e) => {
                     setCustomScriptUrl(e.target.value);
                     try {
-                      localStorage.setItem('tina_studio_script_v10', e.target.value);
+                      localStorage.setItem('tina_studio_script_v11', e.target.value);
                     } catch {}
                   }}
                   placeholder="https://script.google.com/macros/s/.../exec"
@@ -2760,10 +2770,8 @@ export default function App() {
                         </p>
                       )}
                       {calendarSyncStatus === 'error' && (
-                        <p className="text-[11px] text-red-700">
-                          {lang === 'EN'
-                            ? 'Note: Google Script URL not connected yet.'
-                            : 'Nota: Falta conectar la URL /exec de Google Script.'}
+                        <p className="text-[11px] text-red-700 font-semibold">
+                          {calendarErrorMsg}
                         </p>
                       )}
                     </div>
